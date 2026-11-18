@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&amp;family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {"darkMode":"class","theme":{"extend":{"colors":{"tertiary-fixed-dim":"#dcc661","outline-variant":"#434653","on-secondary-container":"#b1b6ba","surface-tint":"#b1c5ff","on-surface-variant":"#c3c6d5","on-tertiary-fixed-variant":"#524600","secondary-container":"#42474b","inverse-primary":"#2259bf","primary-fixed":"#d9e2ff","on-tertiary":"#393000","on-surface":"#e3e2e3","on-tertiary-container":"#4a3f00","background":"#121314","tertiary":"#dcc661","surface-bright":"#38393a","on-background":"#e3e2e3","secondary-fixed":"#dfe3e8","surface-container-highest":"#343536","surface-variant":"#343536","surface":"#121314","inverse-on-surface":"#303031","surface-dim":"#121314","on-error":"#690005","on-secondary-fixed":"#171c20","primary-fixed-dim":"#b1c5ff","on-primary-container":"#e7ebff","inverse-surface":"#e3e2e3","on-secondary":"#2c3135","error-container":"#93000a","secondary-fixed-dim":"#c2c7cc","surface-container-low":"#1b1c1d","on-tertiary-fixed":"#211b00","secondary":"#c2c7cc","primary-container":"#3366cc","on-primary":"#002c70","on-secondary-fixed-variant":"#42474b","primary":"#b1c5ff","outline":"#8d909e","tertiary-container":"#bfab49","on-primary-fixed":"#001946","surface-container":"#1f2021","on-error-container":"#ffdad6","on-primary-fixed-variant":"#00419d","tertiary-fixed":"#f9e37a","surface-container-lowest":"#0d0e0f","error":"#ffb4ab","surface-container-high":"#292a2b"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{},"fontFamily":{"headline":["Noto Serif"],"display":["Noto Serif"],"body":["Inter"],"label":["Public Sans"]},"fontSize":{}}}}</script></head><body class="bg-background font-body text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-6 shadow-[1px_0_12px_rgba(0,0,0,0.3)]"><div class="flex flex-col gap-6"><div class="px-6 flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center"><span class="material-symbols-outlined text-primary text-xl">neurology</span></div><div><span class="font-headline font-bold text-sm tracking-wide text-on-surface block leading-tight">NeuroScan AI</span><span class="font-label text-[10px] uppercase tracking-wider text-outline block">Clinical Suite</span></div></div><div class="px-6"><a class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-surface-container text-xs text-primary font-medium hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="interactive-workspace" href="#"><span class="material-symbols-outlined text-base">arrow_back</span><span>Back to Workspace</span></a></div><nav class="px-3 flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all bg-primary-container text-on-primary-container font-semibold" data-path="diagnostic-report-preview" href="#"><span class="material-symbols-outlined text-lg">description</span><span>Report Preview</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="raw-telemetry-export" href="#"><span class="material-symbols-outlined text-lg">data_table</span><span>Telemetry Datasets</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="physician-dispatch-audit" href="#"><span class="material-symbols-outlined text-lg">forward_to_inbox</span><span>Physician Dispatch</span></a><a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" data-path="compliance-and-sign-off" href="#"><span class="material-symbols-outlined text-lg">approval</span><span>Clinical Sign-off</span></a></nav></div><div class="px-4 flex flex-col gap-4"><div class="p-3 rounded-lg bg-surface-container-lowest text-xs text-on-surface-variant"><div class="flex items-center justify-between text-[11px] font-label font-semibold text-secondary mb-1"><span>STATUS</span><span class="text-tertiary">ENCRYPTED</span></div><p class="text-[11px] text-outline leading-tight">Diagnostic Session #NS-98042</p></div><div class="flex items-center justify-between pt-2 px-2"><div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-tertiary"></span><span class="text-xs font-label text-on-surface-variant">Station Active</span></div><span class="material-symbols-outlined text-outline text-lg cursor-pointer hover:text-on-surface">help_outline</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.25)] z-40 flex items-center justify-between px-8"><div class="flex items-center gap-4"><div class="flex items-center gap-2 text-xs font-label text-outline"><span class="text-on-surface-variant font-medium">Subject:</span><span class="font-semibold text-on-surface">PT-88301-C</span><span class="text-outline-variant">|</span><span class="text-on-surface-variant font-medium">Scan:</span><span class="font-semibold text-on-surface">fMRI-BOLD-T2</span></div></div><div class="flex items-center gap-3"><div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container text-xs text-on-surface-variant"><span class="material-symbols-outlined text-tertiary text-sm">lock</span><span class="font-label text-[11px] tracking-wide">Session Certified</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-16 bg-surface w-full px-8 pb-12"><div class="flex flex-col w-full">
+<!-- Document Viewer Controls Toolbar -->
+<div class="sticky top-16 z-30 flex flex-col gap-2.5 pb-4 bg-surface/95 backdrop-blur-md">
+<div class="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg bg-surface-container-low shadow-md">
+<!-- Left side: Document status & Page Navigation -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container text-xs font-label">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-on-surface font-semibold tracking-wider">OFFICIAL DIAGNOSTIC DISPATCH</span>
+</div>
+<span class="text-outline-variant">|</span>
+<div class="flex items-center gap-1 text-xs font-label text-on-surface-variant">
+<button class="w-7 h-7 flex items-center justify-center rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" id="prev-page-btn">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<span class="px-2 font-mono text-xs text-on-surface">Page <strong class="text-primary font-bold" id="curr-page-indicator">1</strong> of 2</span>
+<button class="w-7 h-7 flex items-center justify-center rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors" id="next-page-btn">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="hidden md:flex items-center gap-1 text-xs font-label text-on-surface-variant ml-2">
+<span class="text-outline">Zoom:</span>
+<button class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors text-[11px] font-medium" id="zoom-fit-btn">Fit Width</button>
+<button class="px-2 py-1 rounded bg-primary-container text-on-primary-container transition-colors text-[11px] font-semibold" id="zoom-100-btn">100%</button>
+</div>
+</div>
+<!-- Right side: Quick Action Buttons -->
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs text-on-surface font-label font-medium transition-all shadow-sm" onclick="window.print()">
+<span class="material-symbols-outlined text-sm text-primary">print</span>
+<span>Print Report</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs text-on-surface font-label font-medium transition-all shadow-sm" id="download-btn">
+<span class="material-symbols-outlined text-sm text-tertiary">download</span>
+<span class="hidden sm:inline">Signed PDF</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs text-on-surface font-label font-medium transition-all shadow-sm" id="export-edf-btn">
+<span class="material-symbols-outlined text-sm text-secondary">database</span>
+<span class="hidden sm:inline">Raw .EDF</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-surface-tint text-xs text-on-primary font-label font-semibold shadow-md transition-all" id="lock-sign-btn">
+<span class="material-symbols-outlined text-sm">verified_user</span>
+<span>Sign &amp; Dispatch</span>
+</button>
+</div>
+</div>
+<!-- Security & Traceability Header Banner -->
+<div class="flex flex-wrap items-center justify-between px-3 py-1.5 rounded bg-surface-container-lowest text-[11px] font-label text-outline gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xs text-tertiary">security</span>
+<span class="text-on-surface-variant">CE-MDR Class IIa Medical Device Engine · ISO-13485:2016 Compliant · GAMP-5 Validated</span>
+</div>
+<div class="flex items-center gap-2 font-mono text-[10px]">
+<span class="text-outline">HASH:</span>
+<span class="text-on-surface bg-surface-container px-1.5 py-0.5 rounded">SHA256:8f4a2109cd7b9a52865ffb019e0428d0119c3e901</span>
+</div>
+</div>
+</div>
+<!-- Document Canvas Container (Realistic White Clinical Sheet) -->
+<div class="flex flex-col items-center justify-center w-full py-4 transition-transform duration-200" id="pdf-view-wrapper">
+<!-- PAGE 1 OF 2 -->
+<article class="w-full max-w-[850px] bg-[#fbfcfd] text-[#111315] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.05)] rounded-lg p-10 md:p-12 mb-8 relative font-body leading-relaxed" id="report-sheet-1">
+<!-- Watermark Seal Behind Paper Content -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-[0.025] overflow-hidden">
+<span class="material-symbols-outlined text-[480px] text-[#002c70]">neurology</span>
+</div>
+<!-- Institutional Report Header -->
+<header class="relative border-b-2 border-[#171c20] pb-6 mb-6">
+<div class="flex items-start justify-between gap-6">
+<div class="flex items-center gap-4">
+<div class="w-14 h-14 rounded-lg bg-[#002c70] flex items-center justify-center text-white shadow-md">
+<span class="material-symbols-outlined text-3xl">psychology_alt</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline font-bold text-xl tracking-tight text-[#0a1829]">NEUROSCAN AI</span>
+<span class="text-[10px] font-label font-bold px-1.5 py-0.5 rounded bg-[#e7ebff] text-[#002c70]">CLINICAL v3.0</span>
+</div>
+<p class="font-label text-xs uppercase tracking-wider text-[#434653] font-semibold">Institute for Quantitative Electroencephalography</p>
+<p class="text-[10px] text-[#717684]">Diagnostic Reference Laboratory &amp; Automated Neuro-Oscillatory Biomarker Suite</p>
+</div>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="font-headline font-semibold text-xs tracking-widest text-[#002c70] uppercase">CONFIDENTIAL MEDICAL REPORT</span>
+<span class="font-mono text-[11px] text-[#434653] font-bold">EXAM REF: EEG-2025-0218-88204</span>
+<span class="text-[10px] text-[#717684] mt-0.5">Accreditation: CAP #89210-4 / CLIA #99D20814</span>
+</div>
+</div>
+<div class="mt-4 pt-3 border-t border-[#dfe3e8] grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px] font-label">
+<div class="flex flex-col">
+<span class="text-[#717684] font-medium">PATIENT ID:</span>
+<span class="font-bold text-[#111315] font-mono">PT-88204-B</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[#717684] font-medium">AGE / GENDER:</span>
+<span class="font-bold text-[#111315]">9.2 yrs / Male (Cohort #042)</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[#717684] font-medium">REFERRING PHYSICIAN:</span>
+<span class="font-bold text-[#111315]">Dr. Marcus Vance, MD</span>
+</div>
+<div class="flex flex-col text-right md:text-right">
+<span class="text-[#717684] font-medium">RECORDING UTC:</span>
+<span class="font-bold text-[#111315] font-mono">2025-02-18 10:14:02</span>
+</div>
+</div>
+</header>
+<!-- Exam Dossier Technical Details Strip -->
+<section class="mb-6 p-3 rounded-lg bg-[#f1f3f6] text-[11px] font-label text-[#2c3135] grid grid-cols-1 sm:grid-cols-3 gap-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-[#00419d]">settings_input_component</span>
+<span><strong>Montage:</strong> 19-Channel 10-20 (Cz Ref)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-[#00419d]">speed</span>
+<span><strong>Sampling Rate:</strong> 256 Hz (180.0s clean)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-[#00419d]">filter_alt</span>
+<span><strong>Filter:</strong> 1.0 - 45.0 Hz + 50Hz Notch</span>
+</div>
+</section>
+<!-- Primary Diagnostic Verdict Hero Panel -->
+<section class="mb-7 p-5 rounded-xl bg-gradient-to-r from-[#edf2fe] via-[#f7f9fd] to-[#f4f1e4] border-l-4 border-[#002c70] shadow-sm">
+<div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+<span class="font-label text-[10px] font-bold tracking-widest uppercase text-[#00419d] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-[#00419d]">neurology</span>
+            EXECUTIVE QUANTITATIVE EEG VERDICT
+          </span>
+<span class="px-2 py-0.5 rounded text-[11px] font-label font-bold bg-[#bfab49]/20 text-[#4a3f00]">HIGH CERTITUDE BENCHMARK</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-baseline justify-between gap-4 mt-2">
+<div>
+<h2 class="font-headline font-bold text-xl md:text-2xl text-[#002c70] leading-tight">
+              POSITIVE FOR ADHD NEURO-OSCILLATORY PATTERN
+            </h2>
+<p class="text-xs text-[#434653] mt-1 font-body">
+              Consistent with combined inattentive-hyperactive spectral signature according to American Academy of Pediatrics &amp; IEEE-0428 pediatric normative standards.
+            </p>
+</div>
+<div class="text-right shrink-0">
+<div class="text-3xl font-headline font-bold text-[#002c70]">94.2<span class="text-lg font-normal">%</span></div>
+<div class="text-[10px] font-label text-[#717684]">Ensemble Biomarker Index</div>
+</div>
+</div>
+<!-- Ensemble Probability Bar -->
+<div class="mt-4 pt-3 border-t border-[#dfe3e8]/70">
+<div class="flex justify-between text-[11px] font-label mb-1.5">
+<span class="font-semibold text-[#171c20]">Ensemble Consensus (ADHD vs Neurotypical Control):</span>
+<span class="font-mono font-bold text-[#002c70]">94.2% ADHD (Cutoff: &gt; 49.0%)</span>
+</div>
+<div class="w-full h-3 rounded-full bg-[#dfe3e8] overflow-hidden flex">
+<div class="h-full bg-[#002c70] rounded-l-full" style="width: 94.2%"></div>
+<div class="h-full bg-[#c2c7cc]" style="width: 5.8%"></div>
+</div>
+<div class="flex justify-between text-[9px] font-mono text-[#717684] mt-1">
+<span>0.0% Neurotypical</span>
+<span class="font-bold text-[#00419d]">Diagnostic Threshold (0.490)</span>
+<span>100.0% Severe Dysregulation</span>
+</div>
+</div>
+</section>
+<!-- Key Quantitative Biomarkers Table -->
+<section class="mb-7">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-headline font-bold text-sm tracking-wide text-[#111315] uppercase">I. Primary Electrophysiological Biomarkers</h3>
+<span class="text-[10px] font-label text-[#717684]">Z-Score Reference: Age-Matched Healthy Cohort (N=1,240)</span>
+</div>
+<div class="overflow-hidden rounded-lg border border-[#e1e4e8] bg-white">
+<table class="w-full text-left text-xs font-body">
+<thead>
+<tr class="bg-[#f5f7fa] text-[#434653] font-label text-[10px] uppercase tracking-wider border-b border-[#e1e4e8]">
+<th class="py-2.5 px-3 font-semibold">Biomarker Metric</th>
+<th class="py-2.5 px-3 font-semibold">Observed Value</th>
+<th class="py-2.5 px-3 font-semibold">Normal Baseline</th>
+<th class="py-2.5 px-3 font-semibold">Deviation (Z-Score)</th>
+<th class="py-2.5 px-3 font-semibold text-right">Clinical Classification</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#edf1f5] text-[11px]">
+<tr class="hover:bg-[#fafbfc]">
+<td class="py-2 px-3 font-semibold text-[#111315]">
+<div>Vertex Theta / Beta Ratio (TBR at Cz)</div>
+<span class="text-[9px] text-[#717684] font-normal">Primary FDA-cleared inattention index (4.0-8.0 / 13.0-21.0 Hz)</span>
+</td>
+<td class="py-2 px-3 font-mono font-bold text-[#002c70]">4.85</td>
+<td class="py-2 px-3 font-mono text-[#717684]">1.50 - 3.00</td>
+<td class="py-2 px-3 font-mono text-[#93000a] font-semibold">+3.28 σ</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label font-bold bg-[#ffdad6] text-[#93000a]">
+                    MARKING ELEVATED
+                  </span>
+</td>
+</tr>
+<tr class="hover:bg-[#fafbfc]">
+<td class="py-2 px-3 font-semibold text-[#111315]">
+<div>Frontal Alpha Asymmetry (FAA: ln[F4] - ln[F3])</div>
+<span class="text-[9px] text-[#717684] font-normal">Affective approach-withdrawal &amp; motivational regulation</span>
+</td>
+<td class="py-2 px-3 font-mono font-bold text-[#111315]">-0.38 dB</td>
+<td class="py-2 px-3 font-mono text-[#717684]">-0.10 to +0.15 dB</td>
+<td class="py-2 px-3 font-mono text-[#93000a] font-semibold">-2.14 σ</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label font-bold bg-[#ffdad6] text-[#93000a]">
+                    HYPOFRONTALITY
+                  </span>
+</td>
+</tr>
+<tr class="hover:bg-[#fafbfc]">
+<td class="py-2 px-3 font-semibold text-[#111315]">
+<div>Peak Attention Saliency Hotspot (Deep CNN)</div>
+<span class="text-[9px] text-[#717684] font-normal">Spatial attention gradient across sensor array</span>
+</td>
+<td class="py-2 px-3 font-mono font-bold text-[#002c70]">Cz (94.2%)</td>
+<td class="py-2 px-3 font-mono text-[#717684]">Uniform (&lt;45%)</td>
+<td class="py-2 px-3 font-mono text-[#4a3f00] font-semibold">+2.90 σ</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label font-bold bg-[#fbf2c8] text-[#524600]">
+                    FOCAL MIDLINE
+                  </span>
+</td>
+</tr>
+<tr class="hover:bg-[#fafbfc]">
+<td class="py-2 px-3 font-semibold text-[#111315]">
+<div>Global Relative Power Spectral Distribution</div>
+<span class="text-[9px] text-[#717684] font-normal">Welch Periodogram: Delta / Theta / Alpha / Beta</span>
+</td>
+<td class="py-2 px-3 font-mono text-[#111315]">θ: 62.8% | β: 11.6%</td>
+<td class="py-2 px-3 font-mono text-[#717684]">θ: ~35% | β: ~22%</td>
+<td class="py-2 px-3 font-mono text-[#93000a] font-semibold">+2.75 σ</td>
+<td class="py-2 px-3 text-right">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label font-bold bg-[#ffdad6] text-[#93000a]">
+                    THETA EXCESS
+                  </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Two-Column Diagnostic Display: Scalp Map + Spectral Graph -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-7">
+<!-- Left: 10-20 Topographic Scalp Map -->
+<div class="p-4 rounded-xl bg-[#f8f9fb] border border-[#e1e4e8] flex flex-col items-center">
+<div class="w-full flex items-center justify-between mb-2">
+<span class="font-headline font-bold text-xs uppercase text-[#111315]">10-20 Topographic Saliency Map</span>
+<span class="text-[9px] font-mono px-2 py-0.5 rounded bg-[#e7ebff] text-[#002c70] font-bold">19 ELECTR.</span>
+</div>
+<!-- Scalp SVG Vector Graphic -->
+<div class="relative w-56 h-56 flex items-center justify-center my-1">
+<svg class="w-full h-full drop-shadow-sm select-none" viewbox="0 0 240 240">
+<!-- Nose and Ears -->
+<polygon fill="#cbd2db" points="120,8 112,24 128,24" stroke="#8d909e" stroke-width="1.5"></polygon>
+<path d="M 28,110 C 18,110 18,135 28,135" fill="none" stroke="#8d909e" stroke-width="1.5"></path>
+<path d="M 212,110 C 222,110 222,135 212,135" fill="none" stroke="#8d909e" stroke-width="1.5"></path>
+<!-- Scalp Outer Ring -->
+<circle cx="120" cy="122" fill="#ffffff" r="92" stroke="#8d909e" stroke-width="2"></circle>
+<!-- Coronal and Sagittal Meridian Reference Lines -->
+<line stroke="#e1e4e8" stroke-dasharray="2,2" x1="120" x2="120" y1="30" y2="214"></line>
+<line stroke="#e1e4e8" stroke-dasharray="2,2" x1="28" x2="212" y1="122" y2="122"></line>
+<circle cx="120" cy="122" fill="none" r="54" stroke="#edf1f5" stroke-dasharray="2,2"></circle>
+<!-- Heatmap Diffusion Concentric Halos around Vertex Cz / Fz -->
+<circle cx="120" cy="122" fill="#bfab49" filter="blur(6px)" opacity="0.22" r="42"></circle>
+<circle cx="120" cy="86" fill="#bfab49" filter="blur(5px)" opacity="0.18" r="32"></circle>
+<circle cx="120" cy="122" fill="#002c70" filter="blur(4px)" opacity="0.35" r="22"></circle>
+<!-- Electrodes (19 Standard Channels) -->
+<!-- Frontal Pole -->
+<g class="cursor-pointer">
+<circle cx="92" cy="46" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle>
+<text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="92" y="49">Fp1</text>
+</g>
+<g class="cursor-pointer">
+<circle cx="148" cy="46" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle>
+<text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="148" y="49">Fp2</text>
+</g>
+<!-- Frontal Row -->
+<g><circle cx="56" cy="74" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="56" y="77">F7</text></g>
+<g><circle cx="88" cy="78" fill="#e7ebff" r="8" stroke="#00419d" stroke-width="2"></circle><text fill="#002c70" font-size="7.5" font-weight="bold" text-anchor="middle" x="88" y="81">F3</text></g>
+<g><circle cx="120" cy="80" fill="#f9e37a" r="9" stroke="#bfab49" stroke-width="2"></circle><text fill="#211b00" font-size="8" font-weight="bold" text-anchor="middle" x="120" y="83">Fz</text></g>
+<g><circle cx="152" cy="78" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="152" y="81">F4</text></g>
+<g><circle cx="184" cy="74" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="184" y="77">F8</text></g>
+<!-- Central Row & Locus Hotspot Cz -->
+<g><circle cx="44" cy="122" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="44" y="125">T3</text></g>
+<g><circle cx="82" cy="122" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="82" y="125">C3</text></g>
+<!-- Hotspot Cz (Elevated Saliency) -->
+<g class="cursor-pointer">
+<circle cx="120" cy="122" fill="#002c70" r="12" stroke="#b1c5ff" stroke-width="2.5"></circle>
+<text fill="#ffffff" font-size="9" font-weight="bold" text-anchor="middle" x="120" y="126">Cz</text>
+</g>
+<g><circle cx="158" cy="122" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="158" y="125">C4</text></g>
+<g><circle cx="196" cy="122" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="196" y="125">T4</text></g>
+<!-- Parietal Row -->
+<g><circle cx="56" cy="170" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="56" y="173">T5</text></g>
+<g><circle cx="88" cy="166" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="88" y="169">P3</text></g>
+<g><circle cx="120" cy="164" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="120" y="167">Pz</text></g>
+<g><circle cx="152" cy="166" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="152" y="169">P4</text></g>
+<g><circle cx="184" cy="170" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="184" y="173">T6</text></g>
+<!-- Occipital Row -->
+<g><circle cx="96" cy="198" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="96" y="201">O1</text></g>
+<g><circle cx="144" cy="198" fill="#f0f2f5" r="7" stroke="#717684" stroke-width="1.5"></circle><text fill="#171c20" font-size="7" font-weight="bold" text-anchor="middle" x="144" y="201">O2</text></g>
+</svg>
+</div>
+<!-- Scalp Legend -->
+<div class="flex items-center gap-4 text-[10px] font-label text-[#717684] mt-1">
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#002c70]"></span>Primary Locus (Cz)</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#f9e37a]"></span>Secondary (Fz)</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#f0f2f5] border border-[#717684]"></span>Normative</span>
+</div>
+</div>
+<!-- Right: Relative Power Band Spectrum Breakdown -->
+<div class="p-4 rounded-xl bg-[#f8f9fb] border border-[#e1e4e8] flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-2">
+<span class="font-headline font-bold text-xs uppercase text-[#111315]">Spectral Frequency Distribution</span>
+<span class="text-[9px] font-mono text-[#717684]">Vertex (Cz) Integrated PSD</span>
+</div>
+<p class="text-[11px] text-[#434653] mb-4">
+              Excessive slow-wave theta synchronous density (4-8 Hz) dominates central neocortex with concomitant suppression of fast cognitive beta rhythms.
+            </p>
+<!-- Band Power Bars -->
+<div class="space-y-3 font-mono text-[10px]">
+<div>
+<div class="flex justify-between text-[#171c20] font-semibold mb-1">
+<span>Delta (1.0 - 4.0 Hz)</span>
+<span>14.2% [Norm: 12-18%]</span>
+</div>
+<div class="w-full h-2 rounded-full bg-[#e1e4e8]">
+<div class="h-full bg-[#717684] rounded-full" style="width: 14.2%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[#93000a] font-bold mb-1">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">arrow_upward</span>
+                    Theta (4.0 - 8.0 Hz) — MARKED PEAK
+                  </span>
+<span>62.8% [Norm: ~35%]</span>
+</div>
+<div class="w-full h-2.5 rounded-full bg-[#e1e4e8]">
+<div class="h-full bg-[#002c70] rounded-full" style="width: 62.8%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[#171c20] font-semibold mb-1">
+<span>Alpha (8.0 - 12.0 Hz)</span>
+<span>11.4% [Norm: 18-25%]</span>
+</div>
+<div class="w-full h-2 rounded-full bg-[#e1e4e8]">
+<div class="h-full bg-[#a1a7b5] rounded-full" style="width: 11.4%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-[#93000a] font-semibold mb-1">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">arrow_downward</span>
+                    Beta (13.0 - 30.0 Hz) — ATTENUATED
+                  </span>
+<span>11.6% [Norm: 20-30%]</span>
+</div>
+<div class="w-full h-2 rounded-full bg-[#e1e4e8]">
+<div class="h-full bg-[#bfab49] rounded-full" style="width: 11.6%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Micro-insight -->
+<div class="mt-4 pt-3 border-t border-[#e1e4e8] text-[10px] text-[#717684] flex items-center justify-between font-label">
+<span>Spectral Slope β: -1.78</span>
+<span>Alpha Peak Freq: 9.4 Hz</span>
+<span>Epoch Rejection Rate: 2.1%</span>
+</div>
+</div>
+</section>
+<!-- Page 1 Footer / Transition -->
+<footer class="mt-8 pt-4 border-t border-[#dfe3e8] flex items-center justify-between text-[10px] font-label text-[#717684]">
+<span>NeuroScan AI Clinical Suite™ · Document ID: REP-88204-CLINICAL-V3</span>
+<span>Page 1 of 2 · Confidential Medical Record</span>
+</footer>
+</article>
+<!-- PAGE 2 OF 2 -->
+<article class="w-full max-w-[850px] bg-[#fbfcfd] text-[#111315] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.05)] rounded-lg p-10 md:p-12 mb-6 relative font-body leading-relaxed" id="report-sheet-2">
+<!-- Mini Header Page 2 -->
+<header class="border-b border-[#dfe3e8] pb-3 mb-6 flex items-center justify-between text-xs font-label">
+<div class="flex items-center gap-2">
+<span class="font-headline font-bold text-[#002c70]">NEUROSCAN AI DIAGNOSTIC REPORT</span>
+<span class="text-[#717684]">|</span>
+<span class="font-mono text-[#434653]">SUBJECT: PT-88204-B</span>
+</div>
+<div class="font-mono text-[10px] text-[#717684]">
+          PAGE 2 of 2 · BIO-SIGNAL AUDIT &amp; CLINICAL SIGN-OFF
+        </div>
+</header>
+<!-- 7-Tier Bio-Signal Authenticator Audit Trail -->
+<section class="mb-7">
+<div class="flex items-center justify-between mb-2">
+<h3 class="font-headline font-bold text-sm tracking-wide text-[#111315] uppercase">
+            II. 7-Tier Bio-Signal Authenticator &amp; Telemetry Integrity Audit
+          </h3>
+<span class="text-[10px] font-label font-bold px-2 py-0.5 rounded bg-[#dbe8d8] text-[#164c12]">ALL TIERS PASSED</span>
+</div>
+<p class="text-xs text-[#434653] mb-3">
+          Automated multi-spectral screening verified raw sensor input against artifact contamination, synthetic generators, electrode bridging, and pathological saturation limits prior to transformer inference.
+        </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+<!-- Tier 1 -->
+<div class="p-2.5 rounded-lg bg-[#f5f7fa] border border-[#e1e4e8] text-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label font-bold text-[11px] text-[#171c20]">1. Tensor Dimensions</span>
+<span class="material-symbols-outlined text-sm text-[#1b7e12]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-[10px] text-[#717684] font-mono">[19 channels, 46080 samples]</p>
+<div class="text-[9px] text-[#2c3135] mt-1 font-semibold">Status: Strict Match (Pass)</div>
+</div>
+<!-- Tier 2 -->
+<div class="p-2.5 rounded-lg bg-[#f5f7fa] border border-[#e1e4e8] text-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label font-bold text-[11px] text-[#171c20]">2. Motor BCI Rejection</span>
+<span class="material-symbols-outlined text-sm text-[#1b7e12]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-[10px] text-[#717684] font-mono">Mu-rhythm desync &lt; 0.12</p>
+<div class="text-[9px] text-[#2c3135] mt-1 font-semibold">Status: Pass (Organic Resting)</div>
+</div>
+<!-- Tier 3 -->
+<div class="p-2.5 rounded-lg bg-[#f5f7fa] border border-[#e1e4e8] text-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label font-bold text-[11px] text-[#171c20]">3. Flatline Std Dev</span>
+<span class="material-symbols-outlined text-sm text-[#1b7e12]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-[10px] text-[#717684] font-mono">Min σ = 4.82 µV (&gt; 0.5 µV)</p>
+<div class="text-[9px] text-[#2c3135] mt-1 font-semibold">Status: Pass (Zero Disconnection)</div>
+</div>
+<!-- Tier 4 -->
+<div class="p-2.5 rounded-lg bg-[#f5f7fa] border border-[#e1e4e8] text-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label font-bold text-[11px] text-[#171c20]">4. Saturation Check</span>
+<span class="material-symbols-outlined text-sm text-[#1b7e12]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-[10px] text-[#717684] font-mono">Max excursion = 142.3 µV</p>
+<div class="text-[9px] text-[#2c3135] mt-1 font-semibold">Status: Pass (Within ±10,000 µV)</div>
+</div>
+<!-- Tier 5 -->
+<div class="p-2.5 rounded-lg bg-[#f5f7fa] border border-[#e1e4e8] text-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label font-bold text-[11px] text-[#171c20]">5. 1/f Pink Noise Slope</span>
+<span class="material-symbols-outlined text-sm text-[#1b7e12]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-[10px] text-[#717684] font-mono">Power-law exponent: -1.78</p>
+<div class="text-[9px] text-[#2c3135] mt-1 font-semibold">Status: Pass (Physiologic 1/f)</div>
+</div>
+<!-- Tier 6 & 7 -->
+<div class="p-2.5 rounded-lg bg-[#f5f7fa] border border-[#e1e4e8] text-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label font-bold text-[11px] text-[#171c20]">6 &amp; 7. Clock &amp; Montage</span>
+<span class="material-symbols-outlined text-sm text-[#1b7e12]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-[10px] text-[#717684] font-mono">Jitter 0.02ms · 19/19 Electrodes</p>
+<div class="text-[9px] text-[#2c3135] mt-1 font-semibold">Status: Pass (Hardware Intact)</div>
+</div>
+</div>
+</section>
+<!-- Clinical Interpretive Commentary -->
+<section class="mb-7">
+<h3 class="font-headline font-bold text-sm tracking-wide text-[#111315] uppercase mb-2">
+          III. Neurologist Interpretive Synthesis
+        </h3>
+<div class="p-4 rounded-xl bg-[#f8f9fb] border border-[#e1e4e8] text-xs leading-relaxed text-[#2c3135] space-y-2.5 font-body">
+<p>
+<strong>Qualitative Electrophysiology:</strong> Resting awake 19-channel electroencephalogram recorded during eyes-closed vigilance control demonstrates a statistically robust, bilateral frontocentral excess of slow-wave theta rhythmicity (4.0 - 7.5 Hz), most pronounced at the vertex electrode (Cz) and midline frontal electrode (Fz). Reciprocal attenuation of fast beta activity (13.0 - 21.0 Hz) is documented across both frontal quadrants.
+          </p>
+<p>
+<strong>Quantitative Biomarker Correlation:</strong> The observed Theta/Beta Ratio (TBR = 4.85) is markedly elevated beyond age-matched pediatric normatives (+3.28 standard deviations; p &lt; 0.001). Concomitant Frontal Alpha Asymmetry (FAA = -0.38 dB) indicates hypoactivation of the left dorsolateral prefrontal cortex. This neuro-oscillatory electrotype correlates with attentional gating inefficiency and fronto-striatal dopaminergic dysregulation, corroborating a DSM-5 diagnosis of <strong>Attention-Deficit / Hyperactivity Disorder (Combined Presentation)</strong>.
+          </p>
+<p>
+<strong>Paroxysmal &amp; Epileptiform Screen:</strong> Thorough examination reveals <strong>no epileptiform spikes, sharp waves, spike-wave complexes, or focal slowing</strong>. Background continuity is maintained without evidence of metabolic encephalopathy or generalized paroxysmal discharges.
+          </p>
+</div>
+</section>
+<!-- Clinical Recommendation Plan -->
+<section class="mb-8">
+<h3 class="font-headline font-bold text-sm tracking-wide text-[#111315] uppercase mb-2">
+          IV. Recommendations &amp; Clinical Next Steps
+        </h3>
+<ul class="list-disc list-inside space-y-1.5 text-xs text-[#2c3135] font-body bg-[#ffffff] p-3.5 rounded-lg border border-[#e1e4e8]">
+<li>Correlate quantitative findings with Vanderbilt ADHD Diagnostic Teacher and Parent Rating Scales.</li>
+<li>Consider neuro-cognitive evaluation focusing on sustained executive attentional vigilance.</li>
+<li>If psychostimulant therapy is initiated, follow-up resting qEEG scan recommended at 8 weeks post-titration to evaluate TBR normalization at Cz.</li>
+<li>Recommend behavioral academic classroom accommodations (front-row seating, segmented task delivery).</li>
+</ul>
+</section>
+<!-- Signature & Cryptographic Seal Block -->
+<section class="pt-6 border-t-2 border-[#171c20] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-end">
+<!-- Digital Signature -->
+<div>
+<div class="font-headline italic text-xl text-[#002c70] mb-1 font-semibold" style="font-family: 'Noto Serif', serif;">
+            Dr. Marcus Vance, MD
+          </div>
+<div class="h-0.5 w-full bg-[#171c20] mb-1.5"></div>
+<p class="font-label font-bold text-xs text-[#111315]">Marcus Vance, MD, PhD, FAAN</p>
+<p class="text-[10px] text-[#717684]">Board Certified in Pediatric Neurology</p>
+<p class="text-[10px] text-[#717684]">State Medical License: #MD-8849201</p>
+<p class="text-[10px] font-mono text-[#00419d] mt-0.5">Signed: 2025-02-18 11:22:45 UTC</p>
+</div>
+<!-- Official Hologram / Certification Stamp Mock -->
+<div class="flex flex-col items-center justify-center p-3 rounded-xl bg-[#f5f7fa] border border-[#d1d5dc]">
+<div class="w-16 h-16 rounded-full border-2 border-[#002c70] flex flex-col items-center justify-center text-center p-1 relative">
+<span class="material-symbols-outlined text-sm text-[#002c70]">verified</span>
+<span class="text-[6.5px] font-bold font-label uppercase tracking-tighter text-[#002c70]">NEUROSCAN AI</span>
+<span class="text-[5.5px] font-mono font-semibold text-[#524600]">CERTIFIED</span>
+<span class="text-[5px] text-[#717684]">CLINICAL REF</span>
+</div>
+<span class="text-[9px] font-label font-bold text-[#171c20] mt-1.5">VALIDATED CLINICAL REPORT</span>
+<span class="text-[8px] text-[#717684]">Tamper-Evident Digest Active</span>
+</div>
+<!-- Verification QR & Hash Block -->
+<div class="flex flex-col items-end text-right">
+<div class="w-20 h-20 bg-white p-1 rounded border border-[#d1d5dc] mb-1 flex items-center justify-center">
+<!-- Simulated QR Code SVG -->
+<svg class="w-full h-full text-[#111315]" viewbox="0 0 100 100">
+<path d="M10,10 h30 v30 h-30 z M15,15 v20 h20 v-20 z M22,22 h6 v6 h-6 z M60,10 h30 v30 h-30 z M65,15 v20 h20 v-20 z M72,22 h6 v6 h-6 z M10,60 h30 v30 h-30 z M15,65 v20 h20 v-20 z M22,72 h6 v6 h-6 z M50,15 h5 v5 h-5 z M50,30 h10 v5 h-10 z M65,50 h5 v10 h-5 z M50,60 h5 v15 h-5 z M60,65 h10 v5 h-10 z M75,60 h15 v5 h-15 z M85,70 h5 v20 h-5 z M60,80 h15 v10 h-15 z M75,85 h10 v5 h-10 z" fill="currentColor"></path>
+</svg>
+</div>
+<span class="text-[9px] font-mono text-[#717684]">Scan to Verify Provenance</span>
+<span class="text-[8px] font-mono text-[#00419d] truncate max-w-[180px]">vault.neuroscan.med/r/88204b</span>
+</div>
+</section>
+<!-- Page 2 Footer -->
+<footer class="mt-8 pt-4 border-t border-[#dfe3e8] flex items-center justify-between text-[10px] font-label text-[#717684]">
+<span>NeuroScan AI Engine v3.0 (Class IIa Medical Software)</span>
+<span>Page 2 of 2 · Final Authorized Record</span>
+</footer>
+</article>
+<!-- Bottom Printable Action Callout in Viewer Workspace -->
+<div class="flex items-center gap-4 py-4 text-xs font-label text-outline">
+<button class="flex items-center gap-1 hover:text-on-surface transition-colors" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+<span class="material-symbols-outlined text-sm">arrow_upward</span>
+<span>Back to Top Controls</span>
+</button>
+<span>•</span>
+<span class="text-on-surface-variant">Archived in HIPAA/GDPR Compliant Hospital Vault #NS-98042</span>
+</div>
+</div>
+<!-- Micro-interaction script for toolbar toggles & zoom -->
+<script>
+    (function() {
+      const zoomFitBtn = document.getElementById('zoom-fit-btn');
+      const zoom100Btn = document.getElementById('zoom-100-btn');
+      const viewWrapper = document.getElementById('pdf-view-wrapper');
+      const prevBtn = document.getElementById('prev-page-btn');
+      const nextBtn = document.getElementById('next-page-btn');
+      const pageIndicator = document.getElementById('curr-page-indicator');
+      const page1 = document.getElementById('report-sheet-1');
+      const page2 = document.getElementById('report-sheet-2');
+      const downloadBtn = document.getElementById('download-btn');
+      const exportEdfBtn = document.getElementById('export-edf-btn');
+      const lockSignBtn = document.getElementById('lock-sign-btn');
+
+      if (zoomFitBtn && zoom100Btn && viewWrapper) {
+        zoomFitBtn.addEventListener('click', () => {
+          viewWrapper.style.transform = 'scale(0.92)';
+          zoomFitBtn.classList.replace('bg-surface-container', 'bg-primary-container');
+          zoomFitBtn.classList.replace('text-on-surface', 'text-on-primary-container');
+          zoom100Btn.classList.replace('bg-primary-container', 'bg-surface-container');
+          zoom100Btn.classList.replace('text-on-primary-container', 'text-on-surface');
+        });
+
+        zoom100Btn.addEventListener('click', () => {
+          viewWrapper.style.transform = 'scale(1)';
+          zoom100Btn.classList.replace('bg-surface-container', 'bg-primary-container');
+          zoom100Btn.classList.replace('text-on-surface', 'text-on-primary-container');
+          zoomFitBtn.classList.replace('bg-primary-container', 'bg-surface-container');
+          zoomFitBtn.classList.replace('text-on-primary-container', 'text-on-surface');
+        });
+      }
+
+      if (prevBtn && nextBtn && pageIndicator && page1 && page2) {
+        prevBtn.addEventListener('click', () => {
+          page1.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          pageIndicator.textContent = '1';
+        });
+
+        nextBtn.addEventListener('click', () => {
+          page2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          pageIndicator.textContent = '2';
+        });
+
+        // Intersection observer to track current visible page
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              if (entry.target.id === 'report-sheet-1') pageIndicator.textContent = '1';
+              if (entry.target.id === 'report-sheet-2') pageIndicator.textContent = '2';
+            }
+          });
+        }, { threshold: 0.4 });
+
+        observer.observe(page1);
+        observer.observe(page2);
+      }
+
+      // Quick toast/micro-feedback for interactive buttons
+      function notifyAction(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-6 right-8 z-50 px-4 py-2.5 rounded-lg bg-surface-container-high text-on-surface text-xs font-label shadow-xl border border-outline-variant flex items-center gap-2 animate-bounce';
+        toast.innerHTML = `<span class="material-symbols-outlined text-primary text-base">info</span><span>${msg}</span>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2600);
+      }
+
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => notifyAction('Compiling Signed PDF with cryptographic cert...'));
+      }
+      if (exportEdfBtn) {
+        exportEdfBtn.addEventListener('click', () => notifyAction('Streaming 19-Channel EDF raw data stream (46,080 samples)...'));
+      }
+      if (lockSignBtn) {
+        lockSignBtn.addEventListener('click', () => notifyAction('Clinical protocol locked. Cryptographic signature counter-signed.'));
+      }
+    })();
+  </script>
+</div></main></div></body></html>

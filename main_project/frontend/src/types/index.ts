@@ -67,6 +67,104 @@ export interface WindowPrediction {
   prediction: 'ADHD' | 'Control' | string;
 }
 
+export interface SpatialElectrodeData {
+  id?: string;
+  channel?: string;
+  name?: string;
+  lobe?: 'Frontal' | 'Central' | 'Temporal' | 'Parietal' | 'Occipital' | string;
+  region?: 'Frontal' | 'Central' | 'Temporal' | 'Parietal' | 'Occipital' | string;
+  delta_power?: number;
+  delta?: number;
+  theta_power?: number;
+  theta?: number;
+  alpha_power?: number;
+  alpha?: number;
+  beta_power?: number;
+  beta?: number;
+  gamma_power?: number;
+  gamma?: number;
+  total_power: number;
+  relative_powers?: {
+    delta: number;
+    theta: number;
+    alpha: number;
+    beta: number;
+    gamma: number;
+  };
+  relative_power?: {
+    delta: number;
+    theta: number;
+    alpha: number;
+    beta: number;
+    gamma: number;
+  };
+  tbr: number;
+  is_available?: boolean;
+}
+
+export interface RegionalSummaryData {
+  region: string;
+  channel_count: number;
+  channels: string[];
+  delta_power?: number;
+  delta?: number;
+  theta_power?: number;
+  theta?: number;
+  alpha_power?: number;
+  alpha?: number;
+  beta_power?: number;
+  beta?: number;
+  gamma_power?: number;
+  gamma?: number;
+  total_power: number;
+  tbr: number;
+  dominant_band?: string;
+  relative_powers?: {
+    delta: number;
+    theta: number;
+    alpha: number;
+    beta: number;
+    gamma: number;
+  };
+}
+
+export interface ProminentChannelItem {
+  id?: string;
+  channel?: string;
+  name?: string;
+  lobe?: string;
+  region?: string;
+  value: number;
+  rank?: number;
+  metric?: string;
+  description?: string;
+}
+
+export interface MetricRangeData {
+  min: number;
+  max: number;
+  mean: number;
+  std: number;
+  unit: string;
+}
+
+export interface SpatialAnalysisData {
+  channels?: string[];
+  sampling_rate?: number;
+  unit?: string;
+  iaf_hz?: number;
+  global_tbr?: number;
+  profile?: string;
+  spectral_offset?: number;
+  electrodes: Record<string, SpatialElectrodeData>;
+  regions: Record<string, RegionalSummaryData>;
+  prominent_channels: Record<string, ProminentChannelItem[]>;
+  metric_ranges: Record<string, MetricRangeData>;
+  observations?: string[];
+  clinical_observations?: string[];
+  disclaimer: string;
+}
+
 export interface FilePredictionDetails {
   source: string;
   format: string;
@@ -89,6 +187,7 @@ export interface FilePredictionDetails {
   model_probabilities?: Record<string, number>;
   ensemble_weights?: Record<string, number>;
   threshold?: number;
+  spatial_analysis?: SpatialAnalysisData;
 }
 
 export interface FilePredictionResult {
@@ -109,6 +208,7 @@ export interface FilePredictionResult {
   concordance?: string | null;
   error?: string | null;
   details?: FilePredictionDetails | null;
+  spatial_analysis?: SpatialAnalysisData | null;
   model_probabilities?: Record<string, number> | null;
   ensemble_weights?: Record<string, number> | null;
   threshold?: number | null;

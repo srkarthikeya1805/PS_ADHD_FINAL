@@ -76,6 +76,7 @@ class FilePredictionDetails(BaseModel):
     model_probabilities: Optional[Dict[str, float]] = None
     ensemble_weights: Optional[Dict[str, float]] = None
     threshold: Optional[float] = None
+    spatial_analysis: Optional[Dict[str, Any]] = None
 
 
 class FilePredictionResult(BaseModel):
@@ -99,6 +100,7 @@ class FilePredictionResult(BaseModel):
     model_probabilities: Optional[Dict[str, float]] = None
     ensemble_weights: Optional[Dict[str, float]] = None
     threshold: Optional[float] = None
+    spatial_analysis: Optional[Dict[str, Any]] = None
 
 
 class BatchSummary(BaseModel):

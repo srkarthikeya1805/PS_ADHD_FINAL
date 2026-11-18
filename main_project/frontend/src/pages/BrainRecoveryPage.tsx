@@ -987,7 +987,7 @@ export const BrainRecoveryPage: React.FC = () => {
                 </p>
               </div>
 
-              <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#087CFF]/20 text-[#79DFFF] border border-[#20BFE8]/40">
+              <span className="text-xs font-mono px-3 py-1 rounded-full bg-[#087CFF]/20 text-[#79DFFF] border border-[#20BFE8]/40 cursor-default select-none pointer-events-none">
                 IEEE & Mendeley Calibrated
               </span>
             </div>

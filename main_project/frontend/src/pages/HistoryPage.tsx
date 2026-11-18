@@ -129,7 +129,11 @@ export const HistoryPage: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {historyItems.map((item) => {
-                  const isADHD = item.prediction.toLowerCase().includes('adhd');
+                  const predLower = (item.prediction || '').toLowerCase();
+                  const isInvalid = ['unknown', 'non-eeg', 'invalid', 'not evaluated', 'rejected', 'failed'].some(
+                    (kw) => predLower.includes(kw)
+                  );
+                  const isADHD = !isInvalid && predLower.includes('adhd');
                   return (
                     <tr
                       key={item.id}
@@ -147,7 +151,9 @@ export const HistoryPage: React.FC = () => {
                       <td className="py-3 px-4">
                         <span
                           className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            isADHD
+                            isInvalid
+                              ? 'bg-rose-950/80 text-rose-300 border border-rose-500/80'
+                              : isADHD
                               ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                               : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
                           }`}

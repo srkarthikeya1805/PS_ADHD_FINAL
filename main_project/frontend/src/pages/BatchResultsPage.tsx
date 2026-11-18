@@ -539,7 +539,7 @@ export const BatchResultsPage: React.FC = () => {
         {breakdownView === 'cards' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
             {/* Model 1: CNN + Transformer */}
-            <div className="p-5 rounded-2xl bg-slate-950/90 border border-cyan-500/40 shadow-[0_0_20px_rgba(0,229,255,0.15)] space-y-4 relative group transition-all duration-300 hover:scale-[1.03] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,229,255,0.3)]">
+            <div className="p-5 rounded-2xl bg-slate-950/90 border border-cyan-500/40 shadow-[0_0_20px_rgba(0,229,255,0.15)] space-y-4 relative group transition-all duration-300 hover:border-cyan-400">
               <div className="flex items-start justify-between">
                 <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 flex items-center justify-center transition-transform group-hover:scale-110">
                   <Cpu className="w-5 h-5 text-cyan-400" />
@@ -621,7 +621,7 @@ export const BatchResultsPage: React.FC = () => {
               </div>
             </div>
             {/* Model 2: EEGNet Spatio-Temporal */}
-            <div className="p-5 rounded-2xl bg-slate-950/90 border border-violet-500/40 shadow-[0_0_20px_rgba(139,92,246,0.15)] space-y-4 relative group transition-all duration-300 hover:scale-[1.03] hover:border-violet-400 hover:shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+            <div className="p-5 rounded-2xl bg-slate-950/90 border border-violet-500/40 shadow-[0_0_20px_rgba(139,92,246,0.15)] space-y-4 relative group transition-all duration-300 hover:border-violet-400">
               <div className="flex items-start justify-between">
                 <div className="w-10 h-10 rounded-xl bg-violet-500/20 border border-violet-500/40 text-violet-300 flex items-center justify-center transition-transform group-hover:scale-110">
                   <Layers className="w-5 h-5 text-violet-400" />
@@ -703,7 +703,7 @@ export const BatchResultsPage: React.FC = () => {
               </div>
             </div>
             {/* Model 3: PSD + XGBoost Forest */}
-            <div className="p-5 rounded-2xl bg-slate-950/90 border border-fuchsia-500/40 shadow-[0_0_20px_rgba(240,43,213,0.15)] space-y-4 relative group transition-all duration-300 hover:scale-[1.03] hover:border-fuchsia-400 hover:shadow-[0_0_30px_rgba(240,43,213,0.3)]">
+            <div className="p-5 rounded-2xl bg-slate-950/90 border border-fuchsia-500/40 shadow-[0_0_20px_rgba(240,43,213,0.15)] space-y-4 relative group transition-all duration-300 hover:border-fuchsia-400">
               <div className="flex items-start justify-between">
                 <div className="w-10 h-10 rounded-xl bg-fuchsia-500/20 border border-fuchsia-500/40 text-fuchsia-300 flex items-center justify-center transition-transform group-hover:scale-110">
                   <Zap className="w-5 h-5 text-fuchsia-400" />

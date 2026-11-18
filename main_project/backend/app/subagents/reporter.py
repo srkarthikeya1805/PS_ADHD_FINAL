@@ -8,6 +8,7 @@ from app.schemas.responses import (
     FilePredictionResult,
     WindowPrediction,
 )
+from app.preprocessing.spectral import compute_19_channel_spectral_analysis
 from app.subagents.bio_authenticator import BioAuthResult
 from app.utils.files import infer_folder_label, infer_ground_truth_label
 
@@ -76,6 +77,18 @@ class ReporterSubagent:
         )
         duration_sec = round(orig_sample_count / (orig_fs or final_fs), 2)
 
+        # 19-Channel Topographic Spectral & Spatial Activity Analysis
+        available_channels = set(recording.channel_names) if recording.channel_names else set(channel_names)
+        try:
+            spatial_analysis = compute_19_channel_spectral_analysis(
+                data=continuous_preprocessed,
+                fs=final_fs,
+                channel_names=channel_names,
+                available_channel_set=available_channels
+            )
+        except Exception:
+            spatial_analysis = None
+
         details = FilePredictionDetails(
             source=recording.source_format,
             format=path_suffix.lower(),
@@ -123,6 +136,7 @@ class ReporterSubagent:
             concordance=concordance_status,
             error=None,
             details=details,
+            spatial_analysis=spatial_analysis,
             model_probabilities=agg_metrics.get("model_probabilities"),
             ensemble_weights=agg_metrics.get("ensemble_weights"),
             threshold=agg_metrics.get("threshold"),

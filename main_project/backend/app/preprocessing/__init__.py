@@ -87,23 +87,23 @@ def process_eeg_recording(
         )
 
     # 5. Filter: 1–45 Hz bandpass + 50 Hz notch
-    data = apply_bandpass_and_notch(data, current_fs)
+    data_filtered = apply_bandpass_and_notch(data, current_fs)
 
-    # 6. Normalize: per-channel z-score
-    data = normalize_eeg(data)
+    # 6. Normalize: per-channel z-score for neural network tensor inputs
+    data_normalized = normalize_eeg(data_filtered)
 
     # 7. Developmental spectral profiling (IAF and TBR ratio)
-    spec_profile = compute_spectral_profile(data, fs=current_fs)
+    spec_profile = compute_spectral_profile(data_filtered, fs=current_fs)
 
     # 8. Windowing: 10s windows, 50% overlap -> (N, 1280, 19)
-    X = create_eeg_windows(data, fs=current_fs)
+    X = create_eeg_windows(data_normalized, fs=current_fs)
 
     log_pipeline_step(
         "PIPELINE",
         f"Preprocessing complete for '{recording.file_name}': {len(X)} windows of shape {X.shape[1:]} (Profile: {spec_profile['profile']})"
     )
 
-    return X, data, current_fs, channel_names, warnings
+    return X, data_filtered, current_fs, channel_names, warnings
 
 
 __all__ = [

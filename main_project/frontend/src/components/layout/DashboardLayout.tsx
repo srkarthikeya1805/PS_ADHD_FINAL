@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { useIntro } from '../../App';
 
 interface DashboardLayoutProps {
   title?: string;
@@ -10,30 +10,34 @@ interface DashboardLayoutProps {
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitle }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { introPhase } = useIntro();
 
   return (
     <div className="min-h-screen bg-transparent text-[#F3F8FF] flex flex-col font-sans relative z-10">
-      {/* Sidebar */}
-      <Sidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
-
-      {/* Main Content Area */}
+      {/* Sticky Top Header Bar matching NEUROSCAN AI layout - hidden during full-screen intro */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          isSidebarCollapsed ? 'ml-20' : 'ml-72'
+        className={`transition-opacity duration-1000 ${
+          introPhase === 'intro' ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
         <Header title={title} subtitle={subtitle} />
+      </div>
 
-        <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
-          <Outlet />
-        </main>
+      {/* Main Content Area - Full width with balanced padding */}
+      <main className="flex-1 p-4 md:p-8 max-w-7xl w-full mx-auto space-y-12">
+        <Outlet />
+      </main>
 
+      {/* Footer - hidden during full-screen intro */}
+      <div
+        className={`transition-opacity duration-1000 ${
+          introPhase === 'intro' ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
         <Footer />
       </div>
     </div>
   );
 };
+
+export default DashboardLayout;
