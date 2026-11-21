@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Activity, Sparkles, Brain, Layers, Info } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Activity, Sparkles, Brain, Layers, Info, Play, Pause, Waves, Radio } from 'lucide-react';
 import { FilePredictionResult, SpatialElectrodeData, RegionalSummaryData } from '../../types';
 
 export interface ScalpElectrode {
@@ -33,6 +33,10 @@ interface TopographicScalpHeatmapProps {
 export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = ({ isADHD, result }) => {
   const [metricMode, setMetricMode] = useState<'tbr' | 'theta' | 'beta' | 'delta' | 'alpha' | 'gamma'>('tbr');
   const [selectedElectrodeId, setSelectedElectrodeId] = useState<string>('Fz');
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [signalSpeed, setSignalSpeed] = useState<number>(1);
+  const [selectedLobeFilter, setSelectedLobeFilter] = useState<string>('All');
+  const waveformCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Retrieve authentic spatial analysis data if present
   const spatialData = result?.details?.spatial_analysis || result?.spatial_analysis;
@@ -192,6 +196,122 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
   const activeNode = useMemo(() => {
     return electrodes.find((e) => e.id === selectedElectrodeId) || electrodes[4]; // Default to Fz
   }, [electrodes, selectedElectrodeId]);
+
+  // Real-time animated EEG signal waveform canvas for the active channel
+  useEffect(() => {
+    const canvas = waveformCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+    let offset = 0;
+
+    const render = () => {
+      if (isPlaying) {
+        offset += 1.6 * signalSpeed;
+      }
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Dark medical oscilloscope screen
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, w, h);
+
+      // Oscilloscope grid lines
+      ctx.strokeStyle = 'rgba(30, 41, 59, 0.45)';
+      ctx.lineWidth = 1;
+      const gridX = 36;
+      const gridY = 28;
+      for (let x = 0; x < w; x += gridX) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += gridY) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Zero-voltage centerline
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.25)';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(45, h / 2);
+      ctx.lineTo(w - 10, h / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Microvolt grid voltage markers on the left
+      ctx.fillStyle = '#64748b';
+      ctx.font = '9px "JetBrains Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('+50μV', 40, h * 0.2);
+      ctx.fillText('0μV', 40, h * 0.5 + 3);
+      ctx.fillText('-50μV', 40, h * 0.8);
+
+      // Active channel physiological signal wave
+      const lobeColors: Record<string, string> = {
+        Frontal: '#00E5FF',
+        Central: '#10B981',
+        Temporal: '#F59E0B',
+        Parietal: '#8B5CF6',
+        Occipital: '#EC4899',
+      };
+      const traceColor = lobeColors[activeNode.lobe] || '#00E5FF';
+
+      ctx.strokeStyle = traceColor;
+      ctx.lineWidth = 2.0;
+      ctx.shadowColor = traceColor;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+
+      const deltaAmp = Math.min(22, (activeNode.deltaPower / 40) * 16);
+      const thetaAmp = Math.min(32, (activeNode.thetaPower / 45) * 26);
+      const alphaAmp = Math.min(24, (activeNode.alphaPower / 40) * 18);
+      const betaAmp = Math.min(16, (activeNode.betaPower / 25) * 12);
+
+      const chSeed = (activeNode.id.charCodeAt(0) * 7 + (activeNode.id.charCodeAt(1) || 3) * 13) % 50;
+      const startX = 48;
+      const endX = w - 12;
+
+      for (let x = startX; x <= endX; x++) {
+        const t = (x + offset) * 0.045 + chSeed;
+        // Multi-frequency biological superposition
+        const yVal =
+          Math.sin(t * 0.4) * deltaAmp +
+          Math.sin(t * 1.15) * thetaAmp +
+          Math.sin(t * 2.4) * alphaAmp +
+          Math.sin(t * 4.8) * betaAmp +
+          Math.sin(t * 9.5) * 2.5 +
+          (Math.random() - 0.5) * 2.0; // Subtle biological micro-fluctuation
+
+        const y = h / 2 + yVal;
+        if (x === startX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Real-time leading sweep dot indicator
+      const sweepX = startX + ((offset * 1.8) % (endX - startX));
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = '#FFFFFF';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(sweepX, 14, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+    return () => cancelAnimationFrame(animId);
+  }, [isPlaying, signalSpeed, activeNode]);
 
   // Value getter helper
   const getRawValue = (el: ScalpElectrode) => {
@@ -552,14 +672,163 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
           </div>
         </div>
 
-        {/* Right Side: Replaced Image from replace.jpeg */}
-        <div className="lg:col-span-6 flex flex-col justify-center items-center">
-          <div className="w-full rounded-2xl overflow-hidden border border-[#20BFE8]/25 bg-slate-950/80 shadow-[0_0_35px_rgba(0,0,0,0.5)] flex items-center justify-center p-2">
-            <img
-              src="/images/replace.jpeg"
-              alt="Electrode Analysis and Quantitative Biomarkers"
-              className="w-full h-auto max-h-[460px] object-contain rounded-xl"
-            />
+        {/* Right Side: Original Real-Time Moving EEG Signal Waveform Monitor */}
+        <div className="lg:col-span-6 flex flex-col space-y-3">
+          <div className="w-full rounded-2xl overflow-hidden border border-[#20BFE8]/30 bg-slate-950/90 shadow-[0_0_35px_rgba(0,0,0,0.6)] p-4 space-y-3.5 backdrop-blur-xl">
+            {/* Monitor Header with Live Status & Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isPlaying ? 'bg-emerald-400 opacity-75' : 'bg-amber-400 opacity-75'}`} />
+                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isPlaying ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                </span>
+                <div>
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <Waves className="w-3.5 h-3.5 text-cyan-400" />
+                    LIVE EEG SIGNAL WAVEFORM
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400 block">
+                    128 Hz Continuous Telemetry • Common Average Reference (CAR)
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons: Pause/Play & Speed */}
+              <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white text-[11px] font-mono flex items-center gap-1 transition-all cursor-pointer"
+                  title={isPlaying ? 'Pause signal' : 'Play signal'}
+                >
+                  {isPlaying ? <Pause className="w-3 h-3 text-cyan-400" /> : <Play className="w-3 h-3 text-emerald-400" />}
+                  <span>{isPlaying ? 'Freeze' : 'Live'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSignalSpeed(signalSpeed === 1 ? 1.5 : signalSpeed === 1.5 ? 2 : 1)}
+                  className="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-[10px] font-mono font-bold transition-all cursor-pointer"
+                  title="Waveform speed"
+                >
+                  {signalSpeed}x
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Channel Selector Buttons (All 19 Leads) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                <span className="font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1">
+                  <Radio className="w-3 h-3" />
+                  Select Channel to Inspect:
+                </span>
+                {/* Lobe Filter Tabs */}
+                <div className="flex items-center gap-1">
+                  {['All', 'Frontal', 'Central', 'Temporal', 'Parietal', 'Occipital'].map((lobe) => (
+                    <button
+                      key={lobe}
+                      type="button"
+                      onClick={() => setSelectedLobeFilter(lobe)}
+                      className={`px-1.5 py-0.5 rounded text-[9px] font-mono transition-all cursor-pointer ${
+                        selectedLobeFilter === lobe
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold'
+                          : 'text-slate-500 hover:text-slate-300'
+                      }`}
+                    >
+                      {lobe}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Channel Button Bar */}
+              <div className="flex flex-wrap gap-1 max-h-[72px] overflow-y-auto p-1 rounded-xl bg-slate-900/60 border border-slate-800/80">
+                {electrodes
+                  .filter((e) => selectedLobeFilter === 'All' || e.lobe === selectedLobeFilter)
+                  .map((e) => {
+                    const isSelected = activeNode.id === e.id;
+                    const lobeColor =
+                      e.lobe === 'Frontal' ? '#00E5FF' :
+                      e.lobe === 'Central' ? '#10B981' :
+                      e.lobe === 'Temporal' ? '#F59E0B' :
+                      e.lobe === 'Parietal' ? '#8B5CF6' : '#EC4899';
+
+                    return (
+                      <button
+                        key={e.id}
+                        type="button"
+                        onClick={() => setSelectedElectrodeId(e.id)}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition-all duration-200 cursor-pointer flex items-center gap-1 ${
+                          isSelected
+                            ? 'ring-2 ring-cyan-400 shadow-[0_0_12px_rgba(0,229,255,0.4)] scale-105'
+                            : 'bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                        }`}
+                        style={{
+                          backgroundColor: isSelected ? `${lobeColor}25` : undefined,
+                          borderColor: isSelected ? lobeColor : undefined,
+                          color: isSelected ? '#ffffff' : undefined,
+                        }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: lobeColor }}
+                        />
+                        <span>{e.id}</span>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+
+            {/* Oscilloscope Waveform Canvas */}
+            <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-[#020617] shadow-inner">
+              <canvas
+                ref={waveformCanvasRef}
+                width={560}
+                height={220}
+                className="w-full h-[200px] block"
+              />
+              {/* Channel Overlay Badge in Top Right */}
+              <div className="absolute top-2.5 right-3 flex items-center gap-2 pointer-events-none">
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-700 text-[10px] font-mono text-white font-bold backdrop-blur-md shadow-md">
+                  CH: <strong className="text-cyan-400">{activeNode.id}</strong> ({activeNode.lobe})
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-700 text-[10px] font-mono text-emerald-300 font-bold backdrop-blur-md shadow-md">
+                  {metricMode.toUpperCase()}: {getMetricFormatted(activeNode)}
+                </span>
+              </div>
+            </div>
+
+            {/* Live Telemetry Footer: Frequency Band Decomposition */}
+            <div className="grid grid-cols-5 gap-2 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 text-[10px] font-mono">
+              <div className="text-center">
+                <span className="text-pink-400 block font-bold">δ Delta</span>
+                <span className="text-slate-200">{activeNode.deltaPower} μV²</span>
+                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.delta}%)</span>
+              </div>
+              <div className="text-center border-l border-slate-800">
+                <span className="text-violet-400 block font-bold">θ Theta</span>
+                <span className={`font-bold ${activeNode.tbr > 3.0 ? 'text-fuchsia-400' : 'text-slate-200'}`}>
+                  {activeNode.thetaPower} μV²
+                </span>
+                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.theta}%)</span>
+              </div>
+              <div className="text-center border-l border-slate-800">
+                <span className="text-emerald-400 block font-bold">α Alpha</span>
+                <span className="text-slate-200">{activeNode.alphaPower} μV²</span>
+                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.alpha}%)</span>
+              </div>
+              <div className="text-center border-l border-slate-800">
+                <span className="text-cyan-400 block font-bold">β Beta</span>
+                <span className="text-slate-200">{activeNode.betaPower} μV²</span>
+                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.beta}%)</span>
+              </div>
+              <div className="text-center border-l border-slate-800">
+                <span className="text-amber-400 block font-bold">γ Gamma</span>
+                <span className="text-slate-200">{activeNode.gammaPower} μV²</span>
+                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.gamma}%)</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

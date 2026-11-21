@@ -141,8 +141,9 @@ export const DashboardOverviewPage: React.FC = () => {
         const cy0 = window.innerHeight / 2;
         const slotCx = r.left + r.width / 2;
         const slotCy = r.top + r.height / 2;
-        const isDesktop = window.innerWidth >= 1024;
-        const scaleVal = isDesktop ? 0.55 : 0.72;
+        // Exactly match the rendered width of the enlarged video in the dashboard slot
+        const targetWidth = Math.min(r.width, 640);
+        const scaleVal = targetWidth / window.innerWidth;
         return {
           x: slotCx - cx0,
           y: slotCy - cy0,
@@ -154,7 +155,7 @@ export const DashboardOverviewPage: React.FC = () => {
     return {
       x: isDesktop ? (typeof window !== 'undefined' ? window.innerWidth * 0.22 : 320) : 0,
       y: isDesktop ? (typeof window !== 'undefined' ? -window.innerHeight * 0.08 : -50) : 0,
-      scale: 0.55,
+      scale: 0.35,
     };
   }, []);
 
@@ -191,14 +192,14 @@ export const DashboardOverviewPage: React.FC = () => {
     };
   }, [introPhase]);
 
-  // Video Autoplay Initialization with Fast-Forward (~1.85x plays full 30s in ~16s)
+  // Video Autoplay Initialization with Smooth Playback
   useEffect(() => {
     if (introPhase === 'intro') {
       const vid = introVideoRef.current;
       if (!vid) return;
       vid.muted = true;
       vid.currentTime = 0;
-      vid.playbackRate = 1.85; // Fast forward full 30s video to ~16s
+      vid.playbackRate = 1.0; // Silky smooth 60fps playback without decoding lag
       const playPromise = vid.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
@@ -222,9 +223,9 @@ export const DashboardOverviewPage: React.FC = () => {
     const vid = introVideoRef.current;
     if (!vid) return;
 
-    // After full 0-100% initializing (0-10s) and brain expansion/assembly (10-20s),
-    // when glowing blue 3D brain is rotating in 3D (at ~24.0s):
-    if (introPhase === 'intro' && vid.currentTime >= 24.0) {
+    // After full 0-100% initializing and neural assembly,
+    // when glowing blue 3D brain is rotating in 3D (at ~23.0s):
+    if (introPhase === 'intro' && vid.currentTime >= 23.0) {
       setTravelOffset(getTravelOffset());
       setIntroPhase('traveling');
     }
@@ -234,7 +235,7 @@ export const DashboardOverviewPage: React.FC = () => {
     if (introPhase === 'settled') return;
     const vid = introVideoRef.current;
     if (vid) {
-      vid.currentTime = 24.0;
+      vid.currentTime = 23.0;
     }
     setTravelOffset(getTravelOffset());
     setIntroPhase('traveling');
@@ -246,7 +247,7 @@ export const DashboardOverviewPage: React.FC = () => {
     const vid = introVideoRef.current;
     if (vid) {
       vid.currentTime = 0;
-      vid.playbackRate = 1.85;
+      vid.playbackRate = 1.0;
       vid.play().catch(() => {});
     }
   };
@@ -589,25 +590,28 @@ export const DashboardOverviewPage: React.FC = () => {
                   ref={introVideoRef}
                   src="/videos/new.mp4"
                   autoPlay
+                  loop
                   muted
                   playsInline
                   disablePictureInPicture={true}
                   controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                   onTimeUpdate={handleTimeUpdate}
-                  className={`w-full h-full object-contain pointer-events-none transition-all duration-700 ${
+                  className={`w-full h-full ${
+                    introPhase === 'intro' ? 'object-cover' : 'object-contain'
+                  } pointer-events-none transition-all duration-700 ${
                     introPhase === 'traveling'
-                      ? 'mix-blend-screen filter brightness-115 contrast-125 drop-shadow-[0_0_35px_rgba(32,191,232,0.9)]'
+                      ? 'mix-blend-screen'
                       : ''
                   }`}
                   style={{
                     backgroundColor: introPhase === 'traveling' ? 'transparent' : '#030914',
                     maskImage:
                       introPhase === 'traveling'
-                        ? 'radial-gradient(circle at 50% 50%, black 50%, rgba(0,0,0,0.7) 62%, transparent 72%)'
+                        ? 'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)'
                         : undefined,
                     WebkitMaskImage:
                       introPhase === 'traveling'
-                        ? 'radial-gradient(circle at 50% 50%, black 50%, rgba(0,0,0,0.7) 62%, transparent 72%)'
+                        ? 'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)'
                         : undefined,
                   }}
                 />
@@ -624,10 +628,10 @@ export const DashboardOverviewPage: React.FC = () => {
           {/* Ambient Glow */}
           <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full filter blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Content - Styled matching BrainPremium typography & arrangement */}
             <motion.div
-              className="lg:col-span-7 space-y-6"
+              className="lg:col-span-6 space-y-6"
               animate={{
                 opacity: introPhase === 'settled' || introPhase === 'traveling' ? 1 : 0,
                 x: introPhase === 'settled' || introPhase === 'traveling' ? 0 : -35,
@@ -692,14 +696,14 @@ export const DashboardOverviewPage: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Right: Frameless 3D Rotating Brain with Coordinate Reticle */}
+            {/* Right: Frameless Enlarged 3D Rotating Brain with Clean Alpha Mask */}
             <div
               ref={brainSlotRef}
-              className="lg:col-span-5 flex flex-col items-center justify-center relative pointer-events-auto min-h-[340px] md:min-h-[400px]"
+              className="lg:col-span-6 flex flex-col items-center justify-center relative pointer-events-auto min-h-[420px] md:min-h-[500px] lg:min-h-[540px]"
             >
-              <div className="relative w-full max-w-[460px] h-[340px] md:h-[400px] flex items-center justify-center group cursor-default">
+              <div className="relative w-full max-w-[620px] h-[400px] md:h-[480px] lg:h-[520px] flex items-center justify-center group cursor-default">
                 {/* Glowing Radial Halo */}
-                <div className="absolute w-72 h-72 rounded-full bg-cyan-400/20 filter blur-3xl pointer-events-none animate-pulse" />
+                <div className="absolute w-96 h-96 rounded-full bg-cyan-400/20 filter blur-3xl pointer-events-none animate-pulse" />
 
                 {/* Rotating Brain Video Settled on Right Side */}
                 {introPhase === 'settled' ? (
@@ -715,11 +719,11 @@ export const DashboardOverviewPage: React.FC = () => {
                       controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                       style={{
                         maskImage:
-                          'radial-gradient(circle at 50% 50%, black 50%, rgba(0,0,0,0.7) 62%, transparent 72%)',
+                          'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)',
                         WebkitMaskImage:
-                          'radial-gradient(circle at 50% 50%, black 50%, rgba(0,0,0,0.7) 62%, transparent 72%)',
+                          'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)',
                       }}
-                      className="w-full h-full object-contain mix-blend-screen filter brightness-115 contrast-125 drop-shadow-[0_0_35px_rgba(32,191,232,0.9)] pointer-events-none"
+                      className="w-full h-full object-contain mix-blend-screen pointer-events-none"
                     />
                   </div>
                 ) : (
@@ -1482,7 +1486,7 @@ export const DashboardOverviewPage: React.FC = () => {
       {/* SECTION 7: CLINICAL AND SYSTEM PERFORMANCE CARDS                           */}
       {/* ========================================================================= */}
       <section id="section-performance" className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Card 1: Ensemble Accuracy */}
           <div className="p-5 rounded-2xl glass-panel border border-[#20BFE8]/30 space-y-1.5 bg-[#030a1c]/80 shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:border-[#20BFE8] transition-all">
             <div className="flex items-center justify-between">
@@ -1528,22 +1532,6 @@ export const DashboardOverviewPage: React.FC = () => {
             </span>
             <span className="text-xs font-mono font-bold text-slate-300 block">
               Control True Negative Rejection
-            </span>
-          </div>
-
-          {/* Card 4: Inference Latency */}
-          <div className="p-5 rounded-2xl glass-panel border border-violet-500/30 space-y-1.5 bg-[#030a1c]/80 shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:border-violet-500 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-300 block text-[11px] font-heading font-bold tracking-wider uppercase">
-                INFERENCE LATENCY
-              </span>
-              <Zap className="w-4 h-4 text-[#20BFE8]" />
-            </div>
-            <span className="text-4xl md:text-5xl font-bold font-heading text-transparent bg-clip-text bg-gradient-to-r from-[#C7D2FE] to-[#818CF8] block">
-              &lt; 280ms
-            </span>
-            <span className="text-xs font-mono font-bold text-slate-300 block">
-              Vectorized PSD &amp; STFT Pipeline
             </span>
           </div>
         </div>
