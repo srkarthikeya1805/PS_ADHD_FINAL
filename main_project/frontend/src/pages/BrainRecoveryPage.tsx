@@ -737,12 +737,9 @@ export const BrainRecoveryPage: React.FC = () => {
                 {/* Center Brain Visual */}
                 <div className="relative w-full max-w-[400px] aspect-square flex items-center justify-center">
                   <img
-                    src="/images/brain_rotating_clean.mp4.jpg"
+                    src="/images/neural_synapse_bg.png"
                     alt="Neurological Brain Map"
                     className="w-full h-full object-contain filter drop-shadow-[0_0_30px_rgba(32,191,232,0.4)] opacity-90 rounded-2xl"
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/neural_synapse_bg.png';
-                    }}
                   />
 
                   {/* Hotspot Pins Overlaid on the Brain */}

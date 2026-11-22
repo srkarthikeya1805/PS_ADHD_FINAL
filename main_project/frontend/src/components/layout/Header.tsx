@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshCw, UploadCloud, Activity } from 'lucide-react';
+import { RefreshCw, UploadCloud, Activity, LogOut } from 'lucide-react';
 import { getHealth } from '../../services/api';
 import { HealthResponse } from '../../types';
+import { useIntro } from '../../App';
 
 interface HeaderProps {
   title?: string;
@@ -9,6 +10,7 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = () => {
+  const { logout } = useIntro();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('section-overview');
@@ -138,6 +140,17 @@ export const Header: React.FC<HeaderProps> = () => {
         >
           <UploadCloud className="w-3.5 h-3.5 stroke-[2.5]" />
           <span>New Analysis</span>
+        </button>
+
+        {/* Logout Button */}
+        <button
+          type="button"
+          onClick={logout}
+          title="Sign out of NeuroScan AI session"
+          className="cursor-pointer group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#061426]/90 border border-slate-700/80 hover:border-rose-500/50 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 text-xs font-mono transition-all shadow-sm active:scale-95 select-none"
+        >
+          <LogOut className="w-3.5 h-3.5 text-slate-400 group-hover:text-rose-400 transition-colors" />
+          <span className="hidden sm:inline text-[11px] font-semibold">Logout</span>
         </button>
       </div>
     </header>
