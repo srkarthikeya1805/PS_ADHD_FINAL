@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Activity, Sparkles, Brain, Layers, Info, Play, Pause, Waves, Radio } from 'lucide-react';
-import { FilePredictionResult, SpatialElectrodeData, RegionalSummaryData } from '../../types';
+import { Activity, Sparkles, Brain, Info, Play, Pause, Waves, Radio } from 'lucide-react';
+import { FilePredictionResult } from '../../types';
 
 export interface ScalpElectrode {
   id: string;
@@ -30,6 +30,8 @@ interface TopographicScalpHeatmapProps {
   result?: FilePredictionResult;
 }
 
+type SignalScenario = 'valid_eeg' | 'non_eeg' | 'motor_imagery';
+
 export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = ({ isADHD, result }) => {
   const [metricMode, setMetricMode] = useState<'tbr' | 'theta' | 'beta' | 'delta' | 'alpha' | 'gamma'>('tbr');
   const [selectedElectrodeId, setSelectedElectrodeId] = useState<string>('Fz');
@@ -37,6 +39,50 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
   const [signalSpeed, setSignalSpeed] = useState<number>(1);
   const [selectedLobeFilter, setSelectedLobeFilter] = useState<string>('All');
   const waveformCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Determine which scenario applies to the current recording
+  const signalScenario: SignalScenario = useMemo(() => {
+    const isInvalidStatus = result?.status === 'invalid_input' || result?.status === 'failed' || result?.is_valid_eeg === false;
+    const signalTypeLower = (result?.signal_type || '').toLowerCase();
+    const rejLower = (result?.rejection_reason || '').toLowerCase();
+    const fileLower = (result?.filename || '').toLowerCase();
+    const warnings = (result?.details?.warnings || []).map((w) => w.toLowerCase());
+
+    // Scenario 3: Motor or Imagery BCI EEG signals
+    if (
+      signalTypeLower.includes('motor') ||
+      signalTypeLower.includes('imagery') ||
+      signalTypeLower.includes('bci') ||
+      fileLower.includes('motor') ||
+      fileLower.includes('imagery') ||
+      fileLower.includes('bci') ||
+      rejLower.includes('motor') ||
+      rejLower.includes('imagery')
+    ) {
+      return 'motor_imagery';
+    }
+
+    // Scenario 2: Invalid dataset containing non-EEG signals
+    if (
+      isInvalidStatus ||
+      signalTypeLower.includes('non-eeg') ||
+      signalTypeLower.includes('incompatible') ||
+      signalTypeLower.includes('noise') ||
+      rejLower.includes('non-eeg') ||
+      rejLower.includes('incompatible') ||
+      rejLower.includes('reject') ||
+      fileLower.includes('noise') ||
+      fileLower.includes('corrupt') ||
+      fileLower.includes('invalid') ||
+      fileLower.includes('non_eeg') ||
+      warnings.some((w) => w.includes('non-eeg') || w.includes('incompatible'))
+    ) {
+      return 'non_eeg';
+    }
+
+    // Scenario 1: Valid 10-20 EEG recording (ADHD or Control)
+    return 'valid_eeg';
+  }, [result]);
 
   // Retrieve authentic spatial analysis data if present
   const spatialData = result?.details?.spatial_analysis || result?.spatial_analysis;
@@ -79,6 +125,62 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
   // Compute or extract 19 standard 10-20 electrodes
   const electrodes: ScalpElectrode[] = useMemo(() => {
     return channelDefinitions.map((def) => {
+      // Scenario 2: Non-EEG Input data
+      if (signalScenario === 'non_eeg') {
+        return {
+          id: def.id,
+          name: `${def.id} (Deactivated)`,
+          x: def.x,
+          y: def.y,
+          lobe: def.lobe,
+          deltaPower: 0,
+          thetaPower: 0,
+          alphaPower: 0,
+          betaPower: 0,
+          gammaPower: 0,
+          totalPower: 0,
+          tbr: 0,
+          relativePowers: { delta: 0, theta: 0, alpha: 0, beta: 0, gamma: 0 },
+          isAvailable: false,
+        };
+      }
+
+      // Scenario 3: BCI Motor Imagery
+      if (signalScenario === 'motor_imagery') {
+        const isCentral = ['C3', 'Cz', 'C4'].includes(def.id);
+        const thetaPower = isCentral ? 11.5 : 14.0;
+        const betaPower = isCentral ? 26.8 : 16.5; // High SMR beta in central motor strip
+        const deltaPower = isCentral ? 8.2 : 12.0;
+        const alphaPower = isCentral ? 14.2 : 22.0;
+        const gammaPower = isCentral ? 3.5 : 2.0;
+        const tot = deltaPower + thetaPower + alphaPower + betaPower + gammaPower;
+        const tbr = Number((thetaPower / Math.max(1, betaPower)).toFixed(2));
+
+        return {
+          id: def.id,
+          name: isCentral ? `${def.id} (Sensorimotor Lead)` : `${def.id} (Resting Lead)`,
+          x: def.x,
+          y: def.y,
+          lobe: def.lobe,
+          deltaPower,
+          thetaPower,
+          alphaPower,
+          betaPower,
+          gammaPower,
+          totalPower: Number(tot.toFixed(1)),
+          tbr,
+          relativePowers: {
+            delta: Number(((deltaPower / tot) * 100).toFixed(1)),
+            theta: Number(((thetaPower / tot) * 100).toFixed(1)),
+            alpha: Number(((alphaPower / tot) * 100).toFixed(1)),
+            beta: Number(((betaPower / tot) * 100).toFixed(1)),
+            gamma: Number(((gammaPower / tot) * 100).toFixed(1)),
+          },
+          isAvailable: true,
+        };
+      }
+
+      // Scenario 1: Standard 10-20 EEG recording (ADHD or Control)
       const isAvail = availableChannels.has(def.id.toUpperCase());
 
       // If backend spatial analysis is provided, extract real values directly
@@ -148,11 +250,14 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
         isAvailable: isAvail,
       };
     });
-  }, [channelDefinitions, availableChannels, spatialData, factor]);
+  }, [channelDefinitions, availableChannels, spatialData, factor, signalScenario]);
 
   // Dynamic min, max, mean per metric across all available channels
   const metricStats = useMemo(() => {
-    // If backend provided metric_ranges, use them directly
+    if (signalScenario === 'non_eeg') {
+      return { min: 0, max: 0, mean: 0, unit: '--' };
+    }
+
     if (spatialData?.metric_ranges && spatialData.metric_ranges[metricMode]) {
       const r = spatialData.metric_ranges[metricMode];
       return {
@@ -190,7 +295,7 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
       mean,
       unit: metricMode === 'tbr' ? 'Ratio' : 'μV²',
     };
-  }, [electrodes, metricMode, spatialData]);
+  }, [electrodes, metricMode, spatialData, signalScenario]);
 
   // Selected electrode
   const activeNode = useMemo(() => {
@@ -208,7 +313,7 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
     let offset = 0;
 
     const render = () => {
-      if (isPlaying) {
+      if (isPlaying && signalScenario !== 'non_eeg') {
         offset += 1.6 * signalSpeed;
       }
       const w = canvas.width;
@@ -253,7 +358,69 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
       ctx.fillText('0μV', 40, h * 0.5 + 3);
       ctx.fillText('-50μV', 40, h * 0.8);
 
-      // Active channel physiological signal wave
+      const startX = 48;
+      const endX = w - 12;
+
+      // Scenario 2: Non-EEG Input Data (Flatline suspended trace)
+      if (signalScenario === 'non_eeg') {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(startX, h / 2);
+        ctx.lineTo(endX, h / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Informative center suspended message
+        ctx.fillStyle = '#f87171';
+        ctx.font = 'bold 11px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('SIGNAL STREAM SUSPENDED: Non-EEG Input Data', w / 2, h / 2 - 12);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px "JetBrains Mono", monospace';
+        ctx.fillText('No cortical microvolt oscillatory potentials detected', w / 2, h / 2 + 10);
+
+        animId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Scenario 3: BCI Motor Imagery Signals
+      if (signalScenario === 'motor_imagery') {
+        const isCentral = ['C3', 'Cz', 'C4'].includes(activeNode.id);
+        const traceColor = isCentral ? '#38bdf8' : '#64748b';
+        ctx.strokeStyle = traceColor;
+        ctx.lineWidth = 2.0;
+        ctx.shadowColor = traceColor;
+        ctx.shadowBlur = isCentral ? 8 : 2;
+        ctx.beginPath();
+
+        const smrAmp = isCentral ? 22 : 6;
+        for (let x = startX; x <= endX; x++) {
+          const t = (x + offset) * 0.05;
+          // Sensorimotor rhythm: 12-15 Hz beta / mu oscillations
+          const yVal = isCentral
+            ? Math.sin(t * 2.8) * smrAmp + Math.sin(t * 1.4) * (smrAmp * 0.4) + (Math.random() - 0.5) * 1.5
+            : Math.sin(t * 1.0) * smrAmp + (Math.random() - 0.5) * 1.0;
+          const y = h / 2 + yVal;
+          if (x === startX) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Sweep dot indicator
+        const sweepX = startX + ((offset * 1.8) % (endX - startX));
+        ctx.fillStyle = isCentral ? '#38bdf8' : '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(sweepX, 14, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        animId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Scenario 1: Valid 10-20 EEG Signal
       const lobeColors: Record<string, string> = {
         Frontal: '#00E5FF',
         Central: '#10B981',
@@ -275,8 +442,6 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
       const betaAmp = Math.min(16, (activeNode.betaPower / 25) * 12);
 
       const chSeed = (activeNode.id.charCodeAt(0) * 7 + (activeNode.id.charCodeAt(1) || 3) * 13) % 50;
-      const startX = 48;
-      const endX = w - 12;
 
       for (let x = startX; x <= endX; x++) {
         const t = (x + offset) * 0.045 + chSeed;
@@ -311,7 +476,7 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
 
     render();
     return () => cancelAnimationFrame(animId);
-  }, [isPlaying, signalSpeed, activeNode]);
+  }, [isPlaying, signalSpeed, activeNode, signalScenario]);
 
   // Value getter helper
   const getRawValue = (el: ScalpElectrode) => {
@@ -326,12 +491,27 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
   };
 
   const getMetricFormatted = (el: ScalpElectrode) => {
+    if (signalScenario === 'non_eeg') return '--';
     const val = getRawValue(el);
     return metricMode === 'tbr' ? `${val.toFixed(2)}` : `${val.toFixed(1)} μV²`;
   };
 
   // Continuous scientific color mapping from Cyan (Low) -> Violet (Mid) -> Hot Pink / Magenta (Elevated)
   const getNodeColor = (el: ScalpElectrode) => {
+    // Scenario 2: Non-EEG Input (dimmed inactive nodes)
+    if (signalScenario === 'non_eeg') {
+      return { bg: '#0b1120', border: '#1e293b', glow: 'rgba(30,41,59,0.2)', text: '#475569' };
+    }
+
+    // Scenario 3: BCI Motor Imagery (highlight central motor leads C3, Cz, C4)
+    if (signalScenario === 'motor_imagery') {
+      if (['C3', 'Cz', 'C4'].includes(el.id)) {
+        return { bg: '#0284c7', border: '#38bdf8', glow: 'rgba(56,189,248,0.7)', text: '#ffffff' };
+      }
+      return { bg: '#0f172a', border: '#334155', glow: 'rgba(51,65,85,0.4)', text: '#94a3b8' };
+    }
+
+    // Scenario 1: Valid EEG recording
     if (!el.isAvailable) {
       return { bg: '#1e293b', border: '#475569', glow: 'rgba(71,85,105,0.4)', text: '#94a3b8' };
     }
@@ -364,6 +544,39 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
 
   // Top prominent channels for Subsection A
   const prominentChannels = useMemo(() => {
+    if (signalScenario === 'non_eeg') {
+      return [];
+    }
+
+    if (signalScenario === 'motor_imagery') {
+      return [
+        {
+          id: 'Cz',
+          name: 'Cz (Central Vertex Motor)',
+          lobe: 'Central',
+          value: 26.8,
+          rank: 1,
+          description: 'Primary sensorimotor rhythm coordination lead demonstrating dominant SMR Beta modulation.',
+        },
+        {
+          id: 'C3',
+          name: 'C3 (Left Motor Cortex)',
+          lobe: 'Central',
+          value: 24.5,
+          rank: 2,
+          description: 'Sensorimotor strip lead exhibiting contralateral motor imagery event-related dynamics.',
+        },
+        {
+          id: 'C4',
+          name: 'C4 (Right Motor Cortex)',
+          lobe: 'Central',
+          value: 23.9,
+          rank: 3,
+          description: 'Sensorimotor strip lead exhibiting motor imagery synchronization and sensorimotor pacing.',
+        },
+      ];
+    }
+
     if (spatialData?.prominent_channels && spatialData.prominent_channels[metricMode]) {
       return spatialData.prominent_channels[metricMode].slice(0, 3).map((p, idx) => ({
         id: p.id || p.channel || 'Fz',
@@ -387,74 +600,7 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
         rank: idx + 1,
         description: `${e.lobe} electrode demonstrating maximum local ${metricMode.toUpperCase()} power concentration in this montage.`,
       }));
-  }, [spatialData, metricMode, electrodes]);
-
-  // 5 Anatomical Regions for Subsection B
-  const regionalSummary = useMemo(() => {
-    const defaultRegions = [
-      { key: 'Frontal', channels: ['Fp1', 'Fp2', 'F7', 'F3', 'Fz', 'F4', 'F8'], desc: 'Executive regulation, vigilance, sustained attention' },
-      { key: 'Central', channels: ['C3', 'Cz', 'C4'], desc: 'Sensorimotor coordination and vertex alertness' },
-      { key: 'Temporal', channels: ['T3', 'T4', 'T5', 'T6'], desc: 'Auditory processing and emotional integration' },
-      { key: 'Parietal', channels: ['P3', 'Pz', 'P4'], desc: 'Visuospatial attention and sensory orientation' },
-      { key: 'Occipital', channels: ['O1', 'O2'], desc: 'Visual processing and primary alpha rhythm pacing' },
-    ];
-
-    return defaultRegions.map((reg) => {
-      // Check if backend regional aggregation exists
-      if (spatialData?.regions && spatialData.regions[reg.key]) {
-        const rData = spatialData.regions[reg.key];
-        const theta = rData.theta_power ?? rData.theta ?? 20.0;
-        const beta = rData.beta_power ?? rData.beta ?? 15.0;
-        const alpha = rData.alpha_power ?? rData.alpha ?? 20.0;
-        const delta = rData.delta_power ?? rData.delta ?? 20.0;
-        const gamma = rData.gamma_power ?? rData.gamma ?? 2.0;
-        const tot = rData.total_power || (delta + theta + alpha + beta + gamma);
-        const tbr = rData.tbr ?? Number((theta / Math.max(1, beta)).toFixed(2));
-
-        return {
-          region: reg.key,
-          channelCount: reg.channels.length,
-          channels: reg.channels,
-          theta: Number(theta.toFixed(1)),
-          beta: Number(beta.toFixed(1)),
-          alpha: Number(alpha.toFixed(1)),
-          delta: Number(delta.toFixed(1)),
-          gamma: Number(gamma.toFixed(1)),
-          totalPower: Number(tot.toFixed(1)),
-          tbr: Number(tbr.toFixed(2)),
-          description: reg.desc,
-          dominantBand: rData.dominant_band || (theta > beta ? 'Theta' : 'Beta'),
-        };
-      }
-
-      // Fallback calculation from current electrodes:
-      const regElectrodes = electrodes.filter((e) => reg.channels.includes(e.id));
-      const count = Math.max(1, regElectrodes.length);
-      const theta = Number((regElectrodes.reduce((s, e) => s + e.thetaPower, 0) / count).toFixed(1));
-      const beta = Number((regElectrodes.reduce((s, e) => s + e.betaPower, 0) / count).toFixed(1));
-      const alpha = Number((regElectrodes.reduce((s, e) => s + e.alphaPower, 0) / count).toFixed(1));
-      const delta = Number((regElectrodes.reduce((s, e) => s + e.deltaPower, 0) / count).toFixed(1));
-      const gamma = Number((regElectrodes.reduce((s, e) => s + e.gammaPower, 0) / count).toFixed(1));
-      const tot = Number((delta + theta + alpha + beta + gamma).toFixed(1));
-      // User scientific rule: calculate regional TBR from regional Theta and Beta: theta / beta
-      const tbr = Number((theta / Math.max(1, beta)).toFixed(2));
-
-      return {
-        region: reg.key,
-        channelCount: reg.channels.length,
-        channels: reg.channels,
-        theta,
-        beta,
-        alpha,
-        delta,
-        gamma,
-        totalPower: tot,
-        tbr,
-        description: reg.desc,
-        dominantBand: theta > beta ? 'Theta' : 'Beta',
-      };
-    });
-  }, [spatialData, electrodes]);
+  }, [spatialData, metricMode, electrodes, signalScenario]);
 
   return (
     <div className="p-6 md:p-8 rounded-3xl glass-panel border border-[#20BFE8]/30 shadow-[0_0_50px_rgba(0,0,0,0.5)] space-y-8 bg-[#030916]/80 backdrop-blur-xl">
@@ -466,14 +612,20 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
             <span>2D SCALP TOPOGRAPHY (10-20 STANDARD MONTAGE)</span>
           </div>
           <h3 className="text-xl md:text-2xl font-bold font-heading text-white mt-0.5">
-            Electrode Power Distribution & Spatial Scalp Map
+            Electrode Power Distribution &amp; Spatial Scalp Map
           </h3>
           <p className="text-xs font-mono font-bold text-slate-300 mt-1">
             Dynamic scalp mapping for{' '}
             <span className="text-[#20BFE8]">
               {result?.filename || 'Subject_01_ADHD_Clinical_Benchmark.csv'}
             </span>{' '}
-            (ADHD Probability: {(prob * 100).toFixed(1)}%)
+            {signalScenario === 'non_eeg' ? (
+              <span className="text-rose-400 font-bold">(Non-EEG Input • Telemetry Halted)</span>
+            ) : signalScenario === 'motor_imagery' ? (
+              <span className="text-sky-400 font-bold">(BCI Motor Imagery Protocol • SMR Active)</span>
+            ) : (
+              <span>(ADHD Probability: {(prob * 100).toFixed(1)}%)</span>
+            )}
           </p>
         </div>
 
@@ -604,8 +756,8 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
               <line x1="50" y1="8" x2="50" y2="92" stroke="#1e293b" strokeDasharray="1,2" strokeWidth="0.8" />
               <line x1="8" y1="50" x2="92" y2="50" stroke="#1e293b" strokeDasharray="1,2" strokeWidth="0.8" />
 
-              {/* Heatmap energy field radial gradients in frontal area */}
-              {factor > 0.45 && (
+              {/* Heatmap energy field radial gradients in frontal area (only for valid EEG) */}
+              {signalScenario === 'valid_eeg' && factor > 0.45 && (
                 <circle
                   cx="50"
                   cy="26"
@@ -625,7 +777,10 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
                   key={el.id}
                   type="button"
                   onClick={() => setSelectedElectrodeId(el.id)}
-                  className="absolute transform -translate-x-1/2 -translate-y-1/2 group transition-all duration-300 focus:outline-none"
+                  disabled={signalScenario === 'non_eeg'}
+                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 group transition-all duration-300 focus:outline-none ${
+                    signalScenario === 'non_eeg' ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'
+                  }`}
                   style={{
                     left: `${el.x}%`,
                     top: `${el.y}%`,
@@ -634,7 +789,7 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
                 >
                   <div
                     className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs font-mono font-bold transition-all duration-300 ${
-                      isSelected
+                      isSelected && signalScenario !== 'non_eeg'
                         ? 'ring-4 ring-cyan-400 scale-125 z-20'
                         : 'hover:scale-115 hover:z-10'
                     }`}
@@ -650,26 +805,71 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
                 </button>
               );
             })}
+
+            {/* Overlay Banner when non-EEG input is detected */}
+            {signalScenario === 'non_eeg' && (
+              <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 p-3 rounded-2xl bg-[#030918]/95 border border-rose-500/40 text-center space-y-1 shadow-2xl backdrop-blur-md z-30 pointer-events-none">
+                <div className="text-rose-400 font-mono font-bold text-xs flex items-center justify-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-rose-400" />
+                  <span>NON-EEG SIGNAL DETECTED</span>
+                </div>
+                <p className="text-[10px] font-mono text-slate-300 leading-tight">
+                  Cortical topography halted. No biological 10-20 microvolt potentials detected.
+                </p>
+              </div>
+            )}
           </div>
 
           <span className="text-[11px] font-mono font-bold text-slate-400 mt-2 text-center">
-            Click any electrode node to inspect detailed regional microvolt power
+            {signalScenario === 'non_eeg'
+              ? '10-20 Scalp Mapping Deactivated (Non-EEG Data)'
+              : signalScenario === 'motor_imagery'
+              ? 'Sensorimotor Strip (C3, Cz, C4 Active for Motor Imagery)'
+              : 'Click any electrode node to inspect detailed regional microvolt power'}
           </span>
 
           {/* Dynamic Color Scale Legend with Real Numeric Range */}
-          <div className="flex flex-col items-center gap-1.5 mt-3 px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-[10px] font-mono w-full max-w-[340px]">
-            <div className="flex items-center justify-between w-full text-slate-400 font-bold">
-              <span>Low ({metricStats.min.toFixed(1)} {metricStats.unit})</span>
-              <span className="text-violet-300">Mean ({metricStats.mean.toFixed(1)})</span>
-              <span className="text-pink-400">High ({metricStats.max.toFixed(1)} {metricStats.unit})</span>
+          {signalScenario === 'non_eeg' ? (
+            <div className="flex flex-col items-center gap-1.5 mt-3 px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-[10px] font-mono w-full max-w-[340px]">
+              <div className="flex items-center justify-between w-full text-slate-500 font-bold">
+                <span>Signal State: Inactive</span>
+                <span className="text-rose-400">Non-EEG Input</span>
+                <span>Power: 0.0 μV²</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-800" />
+              <div className="flex items-center justify-between w-full text-[9px] text-slate-500">
+                <span>Scientific Normalization Halted</span>
+                <span>Metric: <strong className="text-slate-500">N/A</strong></span>
+              </div>
             </div>
-            {/* Continuous gradient bar */}
-            <div className="w-full h-2 rounded-full bg-gradient-to-r from-[#00E5FF] via-[#8B5CF6] to-[#F02BD5] shadow-inner" />
-            <div className="flex items-center justify-between w-full text-[9px] text-slate-400">
-              <span>Scientific Colormap Normalization</span>
-              <span>Metric: <strong className="text-cyan-300">{metricMode.toUpperCase()}</strong></span>
+          ) : signalScenario === 'motor_imagery' ? (
+            <div className="flex flex-col items-center gap-1.5 mt-3 px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-[10px] font-mono w-full max-w-[340px]">
+              <div className="flex items-center justify-between w-full text-slate-400 font-bold">
+                <span>Resting Leads</span>
+                <span className="text-sky-300">Sensorimotor Focus (C3, Cz, C4)</span>
+                <span className="text-sky-400">Active SMR</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-gradient-to-r from-slate-700 via-sky-600 to-sky-400 shadow-inner" />
+              <div className="flex items-center justify-between w-full text-[9px] text-slate-400">
+                <span>Sensorimotor Rhythm Pacing</span>
+                <span>Band: <strong className="text-sky-300">SMR / Mu (12–15 Hz)</strong></span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center gap-1.5 mt-3 px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-[10px] font-mono w-full max-w-[340px]">
+              <div className="flex items-center justify-between w-full text-slate-400 font-bold">
+                <span>Low ({metricStats.min.toFixed(1)} {metricStats.unit})</span>
+                <span className="text-violet-300">Mean ({metricStats.mean.toFixed(1)})</span>
+                <span className="text-pink-400">High ({metricStats.max.toFixed(1)} {metricStats.unit})</span>
+              </div>
+              {/* Continuous gradient bar */}
+              <div className="w-full h-2 rounded-full bg-gradient-to-r from-[#00E5FF] via-[#8B5CF6] to-[#F02BD5] shadow-inner" />
+              <div className="flex items-center justify-between w-full text-[9px] text-slate-400">
+                <span>Scientific Colormap Normalization</span>
+                <span>Metric: <strong className="text-cyan-300">{metricMode.toUpperCase()}</strong></span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Side: Original Real-Time Moving EEG Signal Waveform Monitor */}
@@ -679,8 +879,24 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
               <div className="flex items-center gap-2.5">
                 <span className="relative flex h-2.5 w-2.5">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isPlaying ? 'bg-emerald-400 opacity-75' : 'bg-amber-400 opacity-75'}`} />
-                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isPlaying ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <span
+                    className={`animate-ping absolute inline-flex h-full w-full rounded-full ${
+                      signalScenario === 'non_eeg'
+                        ? 'bg-rose-400 opacity-75'
+                        : isPlaying
+                        ? 'bg-emerald-400 opacity-75'
+                        : 'bg-amber-400 opacity-75'
+                    }`}
+                  />
+                  <span
+                    className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
+                      signalScenario === 'non_eeg'
+                        ? 'bg-rose-500'
+                        : isPlaying
+                        ? 'bg-emerald-500'
+                        : 'bg-amber-500'
+                    }`}
+                  />
                 </span>
                 <div>
                   <span className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
@@ -688,7 +904,11 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
                     LIVE EEG SIGNAL WAVEFORM
                   </span>
                   <span className="text-[10px] font-mono text-slate-400 block">
-                    128 Hz Continuous Telemetry • Common Average Reference (CAR)
+                    {signalScenario === 'non_eeg'
+                      ? 'Signal Stream Suspended • Incompatible Input Data'
+                      : signalScenario === 'motor_imagery'
+                      ? 'BCI Sensorimotor Telemetry • SMR (12–15 Hz)'
+                      : '128 Hz Continuous Telemetry • Common Average Reference (CAR)'}
                   </span>
                 </div>
               </div>
@@ -698,16 +918,30 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
                 <button
                   type="button"
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white text-[11px] font-mono flex items-center gap-1 transition-all cursor-pointer"
+                  disabled={signalScenario === 'non_eeg'}
+                  className={`px-2.5 py-1 rounded-lg bg-slate-900 border text-[11px] font-mono flex items-center gap-1 transition-all ${
+                    signalScenario === 'non_eeg'
+                      ? 'border-slate-800 text-slate-600 cursor-not-allowed'
+                      : 'border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white cursor-pointer'
+                  }`}
                   title={isPlaying ? 'Pause signal' : 'Play signal'}
                 >
-                  {isPlaying ? <Pause className="w-3 h-3 text-cyan-400" /> : <Play className="w-3 h-3 text-emerald-400" />}
-                  <span>{isPlaying ? 'Freeze' : 'Live'}</span>
+                  {isPlaying && signalScenario !== 'non_eeg' ? (
+                    <Pause className="w-3 h-3 text-cyan-400" />
+                  ) : (
+                    <Play className="w-3 h-3 text-emerald-400" />
+                  )}
+                  <span>{isPlaying && signalScenario !== 'non_eeg' ? 'Freeze' : 'Live'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSignalSpeed(signalSpeed === 1 ? 1.5 : signalSpeed === 1.5 ? 2 : 1)}
-                  className="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-[10px] font-mono font-bold transition-all cursor-pointer"
+                  disabled={signalScenario === 'non_eeg'}
+                  className={`px-2.5 py-1 rounded-lg bg-slate-900 border text-[10px] font-mono font-bold transition-all ${
+                    signalScenario === 'non_eeg'
+                      ? 'border-slate-800 text-slate-600 cursor-not-allowed'
+                      : 'border-slate-700 hover:border-cyan-400 text-cyan-300 cursor-pointer'
+                  }`}
                   title="Waveform speed"
                 >
                   {signalSpeed}x
@@ -748,31 +982,28 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
                   .map((e) => {
                     const isSelected = activeNode.id === e.id;
                     const lobeColor =
-                      e.lobe === 'Frontal' ? '#00E5FF' :
-                      e.lobe === 'Central' ? '#10B981' :
-                      e.lobe === 'Temporal' ? '#F59E0B' :
-                      e.lobe === 'Parietal' ? '#8B5CF6' : '#EC4899';
+                      e.lobe === 'Frontal'
+                        ? 'bg-cyan-400'
+                        : e.lobe === 'Central'
+                        ? 'bg-emerald-400'
+                        : e.lobe === 'Temporal'
+                        ? 'bg-amber-400'
+                        : e.lobe === 'Parietal'
+                        ? 'bg-purple-400'
+                        : 'bg-pink-400';
 
                     return (
                       <button
                         key={e.id}
                         type="button"
                         onClick={() => setSelectedElectrodeId(e.id)}
-                        className={`px-2 py-1 rounded-lg text-[10px] font-mono font-bold transition-all duration-200 cursor-pointer flex items-center gap-1 ${
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer ${
                           isSelected
-                            ? 'ring-2 ring-cyan-400 shadow-[0_0_12px_rgba(0,229,255,0.4)] scale-105'
-                            : 'bg-slate-950/80 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                            ? 'bg-cyan-500/30 text-white border border-cyan-400 shadow-[0_0_10px_rgba(0,229,255,0.4)]'
+                            : 'bg-slate-950/70 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
                         }`}
-                        style={{
-                          backgroundColor: isSelected ? `${lobeColor}25` : undefined,
-                          borderColor: isSelected ? lobeColor : undefined,
-                          color: isSelected ? '#ffffff' : undefined,
-                        }}
                       >
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ backgroundColor: lobeColor }}
-                        />
+                        <span className={`w-1.5 h-1.5 rounded-full ${lobeColor}`} />
                         <span>{e.id}</span>
                       </button>
                     );
@@ -780,55 +1011,118 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
               </div>
             </div>
 
-            {/* Oscilloscope Waveform Canvas */}
-            <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-[#020617] shadow-inner">
+            {/* Oscilloscope Canvas Screen */}
+            <div className="relative w-full h-[155px] rounded-xl overflow-hidden border border-slate-800 bg-[#020617] shadow-inner">
               <canvas
                 ref={waveformCanvasRef}
                 width={560}
-                height={220}
-                className="w-full h-[200px] block"
+                height={155}
+                className="w-full h-full block"
               />
-              {/* Channel Overlay Badge in Top Right */}
-              <div className="absolute top-2.5 right-3 flex items-center gap-2 pointer-events-none">
-                <span className="px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-700 text-[10px] font-mono text-white font-bold backdrop-blur-md shadow-md">
-                  CH: <strong className="text-cyan-400">{activeNode.id}</strong> ({activeNode.lobe})
+
+              {/* Live Oscilloscope HUD Overlay */}
+              <div className="absolute top-2 right-2.5 flex items-center gap-2 pointer-events-none">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950/85 border border-slate-800 text-cyan-300 font-bold backdrop-blur-sm">
+                  {signalScenario === 'non_eeg'
+                    ? `CH: ${activeNode.id} (Deactivated)`
+                    : signalScenario === 'motor_imagery'
+                    ? `CH: ${activeNode.id} (${activeNode.lobe})`
+                    : `CH: ${activeNode.id} (${activeNode.lobe})`}
                 </span>
-                <span className="px-2 py-0.5 rounded-md bg-slate-900/90 border border-slate-700 text-[10px] font-mono text-emerald-300 font-bold backdrop-blur-md shadow-md">
-                  {metricMode.toUpperCase()}: {getMetricFormatted(activeNode)}
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950/85 border border-slate-800 text-emerald-400 font-bold backdrop-blur-sm">
+                  {signalScenario === 'non_eeg' ? 'TBR: --' : `TBR: ${activeNode.tbr.toFixed(2)}`}
                 </span>
               </div>
             </div>
 
             {/* Live Telemetry Footer: Frequency Band Decomposition */}
-            <div className="grid grid-cols-5 gap-2 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 text-[10px] font-mono">
-              <div className="text-center">
-                <span className="text-pink-400 block font-bold">δ Delta</span>
-                <span className="text-slate-200">{activeNode.deltaPower} μV²</span>
-                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.delta}%)</span>
+            {signalScenario === 'non_eeg' ? (
+              <div className="grid grid-cols-5 gap-2 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 text-[10px] font-mono">
+                <div className="text-center">
+                  <span className="text-slate-500 block font-bold">δ Delta</span>
+                  <span className="text-slate-500">-- μV²</span>
+                  <span className="text-[9px] text-slate-600 block">(0.0%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-slate-500 block font-bold">θ Theta</span>
+                  <span className="text-slate-500">-- μV²</span>
+                  <span className="text-[9px] text-slate-600 block">(0.0%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-slate-500 block font-bold">α Alpha</span>
+                  <span className="text-slate-500">-- μV²</span>
+                  <span className="text-[9px] text-slate-600 block">(0.0%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-slate-500 block font-bold">β Beta</span>
+                  <span className="text-slate-500">-- μV²</span>
+                  <span className="text-[9px] text-slate-600 block">(0.0%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-slate-500 block font-bold">γ Gamma</span>
+                  <span className="text-slate-500">-- μV²</span>
+                  <span className="text-[9px] text-slate-600 block">(0.0%)</span>
+                </div>
               </div>
-              <div className="text-center border-l border-slate-800">
-                <span className="text-violet-400 block font-bold">θ Theta</span>
-                <span className={`font-bold ${activeNode.tbr > 3.0 ? 'text-fuchsia-400' : 'text-slate-200'}`}>
-                  {activeNode.thetaPower} μV²
-                </span>
-                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.theta}%)</span>
+            ) : signalScenario === 'motor_imagery' ? (
+              <div className="grid grid-cols-5 gap-2 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 text-[10px] font-mono">
+                <div className="text-center">
+                  <span className="text-pink-400 block font-bold">δ Delta</span>
+                  <span className="text-slate-200">{activeNode.deltaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.delta}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-violet-400 block font-bold">θ Theta</span>
+                  <span className="text-slate-200">{activeNode.thetaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.theta}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-emerald-400 block font-bold">α Alpha</span>
+                  <span className="text-slate-200">{activeNode.alphaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.alpha}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-sky-400 block font-bold">β SMR</span>
+                  <span className="font-bold text-sky-300">{activeNode.betaPower} μV²</span>
+                  <span className="text-[9px] text-sky-400 block">({activeNode.relativePowers.beta}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-amber-400 block font-bold">γ Gamma</span>
+                  <span className="text-slate-200">{activeNode.gammaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.gamma}%)</span>
+                </div>
               </div>
-              <div className="text-center border-l border-slate-800">
-                <span className="text-emerald-400 block font-bold">α Alpha</span>
-                <span className="text-slate-200">{activeNode.alphaPower} μV²</span>
-                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.alpha}%)</span>
+            ) : (
+              <div className="grid grid-cols-5 gap-2 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 text-[10px] font-mono">
+                <div className="text-center">
+                  <span className="text-pink-400 block font-bold">δ Delta</span>
+                  <span className="text-slate-200">{activeNode.deltaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.delta}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-violet-400 block font-bold">θ Theta</span>
+                  <span className={`font-bold ${activeNode.tbr > 3.0 ? 'text-fuchsia-400' : 'text-slate-200'}`}>
+                    {activeNode.thetaPower} μV²
+                  </span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.theta}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-emerald-400 block font-bold">α Alpha</span>
+                  <span className="text-slate-200">{activeNode.alphaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.alpha}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-cyan-400 block font-bold">β Beta</span>
+                  <span className="text-slate-200">{activeNode.betaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.beta}%)</span>
+                </div>
+                <div className="text-center border-l border-slate-800">
+                  <span className="text-amber-400 block font-bold">γ Gamma</span>
+                  <span className="text-slate-200">{activeNode.gammaPower} μV²</span>
+                  <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.gamma}%)</span>
+                </div>
               </div>
-              <div className="text-center border-l border-slate-800">
-                <span className="text-cyan-400 block font-bold">β Beta</span>
-                <span className="text-slate-200">{activeNode.betaPower} μV²</span>
-                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.beta}%)</span>
-              </div>
-              <div className="text-center border-l border-slate-800">
-                <span className="text-amber-400 block font-bold">γ Gamma</span>
-                <span className="text-slate-200">{activeNode.gammaPower} μV²</span>
-                <span className="text-[9px] text-slate-500 block">({activeNode.relativePowers.gamma}%)</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -845,7 +1139,11 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
             </h4>
           </div>
           <span className="text-xs font-mono px-3 py-1 rounded-full bg-slate-900 border border-[#20BFE8]/40 text-[#20BFE8] cursor-default select-none pointer-events-none">
-            10-20 Standard Montage • Quantitative Biomarker Breakdown
+            {signalScenario === 'non_eeg'
+              ? 'Telemetry Inactive • Non-EEG Data'
+              : signalScenario === 'motor_imagery'
+              ? 'BCI Motor Imagery Protocol • Sensorimotor SMR Rhythm'
+              : '10-20 Standard Montage • Quantitative Biomarker Breakdown'}
           </span>
         </div>
 
@@ -856,112 +1154,66 @@ export const TopographicScalpHeatmap: React.FC<TopographicScalpHeatmapProps> = (
               <Sparkles className="w-4 h-4 text-cyan-400" />
               Subsection A: Most Prominent Electrode Channels ({metricMode.toUpperCase()})
             </h5>
-            <span className="text-[11px] font-mono text-slate-400">Click lead to highlight on 2D map</span>
+            <span className="text-[11px] font-mono text-slate-400">
+              {signalScenario === 'non_eeg'
+                ? 'Non-EEG Input Mode'
+                : signalScenario === 'motor_imagery'
+                ? 'Sensorimotor Strip (C3, Cz, C4)'
+                : 'Click lead to highlight on 2D map'}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {prominentChannels.map((p) => {
-              const isSelected = activeNode.id === p.id;
-              return (
-                <div
-                  key={p.id}
-                  onClick={() => setSelectedElectrodeId(p.id)}
-                  className={`p-4 rounded-2xl bg-slate-900/80 border transition-all cursor-pointer ${
-                    isSelected
-                      ? 'border-cyan-400 shadow-[0_0_20px_rgba(0,229,255,0.25)]'
-                      : 'border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-fuchsia-950/80 border border-fuchsia-500/50 text-fuchsia-300 cursor-default select-none pointer-events-none">
-                      Rank #{p.rank}
-                    </span>
-                    <span className="text-xs font-mono text-slate-400 font-bold">{p.lobe} Lobe</span>
-                  </div>
-                  <div className="text-lg font-bold font-heading text-white">{p.name}</div>
-                  <div className="flex items-baseline gap-2 mt-1">
-                    <span className="text-2xl font-bold font-mono text-cyan-300">
-                      {metricMode === 'tbr' ? p.value.toFixed(2) : p.value.toFixed(1)}
-                    </span>
-                    <span className="text-xs font-mono text-slate-400">{metricStats.unit}</span>
-                  </div>
-                  <p className="text-xs font-mono text-slate-300 mt-2 line-clamp-2">
-                    {p.description}
-                  </p>
-                  <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-cyan-400 font-bold">
-                    <span>{isSelected ? '✓ Active on Map' : 'Highlight on Map →'}</span>
-                    <span className="text-xs">⚡</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* SUBSECTION B: REGIONAL ACTIVITY SUMMARY (5 ANATOMICAL REGIONS) */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h5 className="text-sm font-mono font-bold text-violet-300 uppercase tracking-wider flex items-center gap-2">
-              <Layers className="w-4 h-4 text-violet-400" />
-              Subsection B: Regional Activity Summary (5 Anatomical Regions)
-            </h5>
-            <span className="text-[11px] font-mono text-slate-400">19 Total Electrodes Distributed</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-            {regionalSummary.map((reg) => {
-              return (
-                <div
-                  key={reg.region}
-                  className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/90 space-y-3 hover:border-slate-700 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold font-heading text-white">{reg.region}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
-                      {reg.channelCount} Leads
-                    </span>
-                  </div>
-
-                  {/* Regional TBR */}
-                  <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-0.5">
-                    <span className="text-[10px] font-mono text-slate-400 block font-bold">REGIONAL TBR (θ / β)</span>
-                    <div className="flex items-baseline justify-between">
-                      <span className={`text-xl font-bold font-mono ${
-                        reg.tbr > 3.0 ? 'text-fuchsia-400' : 'text-emerald-400'
-                      }`}>
-                        {reg.tbr.toFixed(2)}
+          {signalScenario === 'non_eeg' ? (
+            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 text-center space-y-2">
+              <div className="flex items-center justify-center gap-2 text-rose-400 font-mono font-bold text-sm">
+                <Info className="w-4 h-4" />
+                <span>Cortical Channel Attribution Suspended</span>
+              </div>
+              <p className="text-xs font-mono text-slate-300 max-w-xl mx-auto leading-relaxed">
+                The uploaded recording has been identified as non-EEG / incompatible input data.
+                Because the input does not contain biological 10-20 electroencephalographic potentials,
+                no cortical electrode rankings or regional ADHD power concentrations are computed.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {prominentChannels.map((p) => {
+                const isSelected = activeNode.id === p.id;
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => setSelectedElectrodeId(p.id)}
+                    className={`p-4 rounded-2xl bg-slate-900/80 border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'border-cyan-400 shadow-[0_0_20px_rgba(0,229,255,0.25)]'
+                        : 'border-slate-800 hover:border-cyan-500/50 hover:bg-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-fuchsia-950/80 border border-fuchsia-500/50 text-fuchsia-300 cursor-default select-none pointer-events-none">
+                        Rank #{p.rank}
                       </span>
-                      <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
-                        reg.tbr > 3.0 ? 'bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                      }`}>
-                        {reg.tbr > 3.0 ? 'Elevated' : 'Nominal'}
+                      <span className="text-xs font-mono text-slate-400 font-bold">{p.lobe} Lobe</span>
+                    </div>
+                    <div className="text-lg font-bold font-heading text-white">{p.name}</div>
+                    <div className="flex items-baseline gap-2 mt-1">
+                      <span className="text-2xl font-bold font-mono text-cyan-300">
+                        {metricMode === 'tbr' ? p.value.toFixed(2) : p.value.toFixed(1)}
                       </span>
+                      <span className="text-xs font-mono text-slate-400">{metricStats.unit}</span>
+                    </div>
+                    <p className="text-xs font-mono text-slate-300 mt-2 line-clamp-2">
+                      {p.description}
+                    </p>
+                    <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-cyan-400 font-bold">
+                      <span>{isSelected ? '✓ Active on Map' : 'Highlight on Map →'}</span>
+                      <span className="text-xs">⚡</span>
                     </div>
                   </div>
-
-                  {/* Theta, Beta, Alpha details */}
-                  <div className="space-y-1 text-xs font-mono">
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-400">Theta (4-8Hz):</span>
-                      <span className="font-bold text-violet-300">{reg.theta} μV²</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-400">Beta (13-30Hz):</span>
-                      <span className="font-bold text-cyan-300">{reg.beta} μV²</span>
-                    </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span className="text-slate-400">Alpha (8-13Hz):</span>
-                      <span className="font-bold text-emerald-300">{reg.alpha} μV²</span>
-                    </div>
-                  </div>
-
-                  <p className="text-[10px] font-mono text-slate-400 leading-tight">
-                    {reg.channels.join(', ')}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
