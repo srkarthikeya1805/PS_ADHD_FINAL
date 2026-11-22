@@ -141,9 +141,13 @@ export const DashboardOverviewPage: React.FC = () => {
         const cy0 = window.innerHeight / 2;
         const slotCx = r.left + r.width / 2;
         const slotCy = r.top + r.height / 2;
-        // Exactly match the rendered width of the enlarged video in the dashboard slot
-        const targetWidth = Math.min(r.width, 640);
-        const scaleVal = targetWidth / window.innerWidth;
+        // In 1280x720 video, the brain height is ~550px (76.4% of 720).
+        // Fullscreen video rendered height:
+        const fullVideoH = Math.max(window.innerHeight, window.innerWidth * (720 / 1280));
+        const fullscreenBrainH = fullVideoH * 0.764;
+        // In the 580x520 right-side slot, the settled brain is ~460px tall:
+        const targetBrainH = Math.min(r.height, 520) * 0.88;
+        const scaleVal = Math.min(1.0, Math.max(0.2, targetBrainH / Math.max(1, fullscreenBrainH)));
         return {
           x: slotCx - cx0,
           y: slotCy - cy0,
@@ -155,7 +159,7 @@ export const DashboardOverviewPage: React.FC = () => {
     return {
       x: isDesktop ? (typeof window !== 'undefined' ? window.innerWidth * 0.22 : 320) : 0,
       y: isDesktop ? (typeof window !== 'undefined' ? -window.innerHeight * 0.08 : -50) : 0,
-      scale: 0.35,
+      scale: 0.45,
     };
   }, []);
 
@@ -194,6 +198,14 @@ export const DashboardOverviewPage: React.FC = () => {
 
   // Video Autoplay Initialization with Smooth Playback
   useEffect(() => {
+    // Keep settled video always playing muted in background for instantaneous 0-delay handoff
+    const sVid = settledVideoRef.current;
+    if (sVid) {
+      sVid.muted = true;
+      sVid.playbackRate = 1.0;
+      sVid.play().catch(() => {});
+    }
+
     if (introPhase === 'intro') {
       const vid = introVideoRef.current;
       if (!vid) return;
@@ -210,12 +222,6 @@ export const DashboardOverviewPage: React.FC = () => {
           window.addEventListener('click', onFirstClick);
         });
       }
-    } else if (introPhase === 'settled') {
-      const sVid = settledVideoRef.current;
-      if (!sVid) return;
-      sVid.muted = true;
-      sVid.playbackRate = 1.0;
-      sVid.play().catch(() => {});
     }
   }, [introPhase, introTrigger]);
 
@@ -223,11 +229,18 @@ export const DashboardOverviewPage: React.FC = () => {
     const vid = introVideoRef.current;
     if (!vid) return;
 
-    // After full 0-100% initializing and neural assembly,
-    // when glowing blue 3D brain is rotating in 3D (at ~23.0s):
-    if (introPhase === 'intro' && vid.currentTime >= 23.0) {
+    // In 11.5s compressed video: full neural expansion & center 360° brain rotation
+    // complete at ~10.65s, before smoothly shrinking and landing at the right position (10.65s - 11.5s):
+    if (introPhase === 'intro' && vid.currentTime >= 10.65) {
       setTravelOffset(getTravelOffset());
       setIntroPhase('traveling');
+
+      // Pre-cue settled video to seamlessly land in sync at 11.5s without any seek delay or rotation pop:
+      if (settledVideoRef.current) {
+        settledVideoRef.current.currentTime = 6.73;
+        settledVideoRef.current.playbackRate = 1.0;
+        settledVideoRef.current.play().catch(() => {});
+      }
     }
   };
 
@@ -235,10 +248,15 @@ export const DashboardOverviewPage: React.FC = () => {
     if (introPhase === 'settled') return;
     const vid = introVideoRef.current;
     if (vid) {
-      vid.currentTime = 23.0;
+      vid.currentTime = 10.65;
     }
     setTravelOffset(getTravelOffset());
     setIntroPhase('traveling');
+    if (settledVideoRef.current) {
+      settledVideoRef.current.currentTime = 6.73;
+      settledVideoRef.current.playbackRate = 1.0;
+      settledVideoRef.current.play().catch(() => {});
+    }
   };
 
   const handleReplayIntro = () => {
@@ -533,7 +551,7 @@ export const DashboardOverviewPage: React.FC = () => {
               }}
               onAnimationComplete={() => {
                 if (introPhase === 'traveling') {
-                  const currentTime = introVideoRef.current?.currentTime || 26.0;
+                  const currentTime = introVideoRef.current?.currentTime || 11.5;
                   setIntroPhase('settled');
                   try {
                     sessionStorage.setItem('neuroscan_intro_viewed', 'true');
@@ -541,8 +559,8 @@ export const DashboardOverviewPage: React.FC = () => {
                     // ignore storage error
                   }
                   if (settledVideoRef.current) {
-                    // Map intro rotation timestamp seamlessly into the 7.5s clean rotation loop
-                    const loopOffset = ((currentTime - 20.0) % 7.5 + 7.5) % 7.5;
+                    // Exact 1:1 phase alignment with 7.5s clean rotation loop
+                    const loopOffset = ((currentTime * (30.0 / 11.5) - 22.42) % 7.5 + 7.5) % 7.5;
                     settledVideoRef.current.currentTime = loopOffset;
                     settledVideoRef.current.playbackRate = 1.0;
                     settledVideoRef.current.play().catch(() => {});
@@ -582,7 +600,7 @@ export const DashboardOverviewPage: React.FC = () => {
                       }
                 }
                 transition={{
-                  duration: 2.0,
+                  duration: 0.85,
                   ease: [0.16, 1, 0.3, 1],
                 }}
               >
@@ -590,12 +608,15 @@ export const DashboardOverviewPage: React.FC = () => {
                   ref={introVideoRef}
                   src="/videos/new.mp4"
                   autoPlay
-                  loop
                   muted
+                  preload="auto"
                   playsInline
                   disablePictureInPicture={true}
                   controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
                   onTimeUpdate={handleTimeUpdate}
+                  onEnded={() => {
+                    setIntroPhase('settled');
+                  }}
                   className={`w-full h-full ${
                     introPhase === 'intro' ? 'object-cover' : 'object-contain'
                   } pointer-events-none transition-all duration-700 ${
@@ -607,11 +628,11 @@ export const DashboardOverviewPage: React.FC = () => {
                     backgroundColor: introPhase === 'traveling' ? 'transparent' : '#030914',
                     maskImage:
                       introPhase === 'traveling'
-                        ? 'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)'
+                        ? 'radial-gradient(circle at 50% 50%, black 44%, rgba(0,0,0,0.7) 56%, transparent 68%)'
                         : undefined,
                     WebkitMaskImage:
                       introPhase === 'traveling'
-                        ? 'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)'
+                        ? 'radial-gradient(circle at 50% 50%, black 44%, rgba(0,0,0,0.7) 56%, transparent 68%)'
                         : undefined,
                   }}
                 />
@@ -696,40 +717,35 @@ export const DashboardOverviewPage: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Right: Frameless Enlarged 3D Rotating Brain with Clean Alpha Mask */}
+            {/* Right Column: Seamless 360° Rotating Brain - Sits at right position and rotates steadily without tilt or directional shifts */}
             <div
               ref={brainSlotRef}
-              className="lg:col-span-6 flex flex-col items-center justify-center relative pointer-events-auto min-h-[420px] md:min-h-[500px] lg:min-h-[540px]"
+              className="lg:col-span-6 flex flex-col items-center justify-center relative pointer-events-auto z-10"
             >
-              <div className="relative w-full max-w-[620px] h-[400px] md:h-[480px] lg:h-[520px] flex items-center justify-center group cursor-default">
-                {/* Glowing Radial Halo */}
-                <div className="absolute w-96 h-96 rounded-full bg-cyan-400/20 filter blur-3xl pointer-events-none animate-pulse" />
+              <div
+                className="relative w-full max-w-[580px] h-[460px] md:h-[520px] flex items-center justify-center rounded-3xl select-none"
+              >
+                {/* Glowing Radial Halo behind the rotating brain */}
+                <div className="absolute w-72 h-72 rounded-full bg-cyan-400/20 filter blur-3xl pointer-events-none animate-pulse" />
 
-                {/* Rotating Brain Video Settled on Right Side */}
-                {introPhase === 'settled' ? (
-                  <div className="w-full h-full flex items-center justify-center transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none select-none">
-                    <video
-                      ref={settledVideoRef}
-                      src="/videos/brain_rotating_loop_clean.mp4"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      disablePictureInPicture={true}
-                      controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
-                      style={{
-                        maskImage:
-                          'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)',
-                        WebkitMaskImage:
-                          'radial-gradient(ellipse 48% 55% at 50% 50%, black 28%, rgba(0,0,0,0.5) 42%, transparent 56%)',
-                      }}
-                      className="w-full h-full object-contain mix-blend-screen pointer-events-none"
-                    />
-                  </div>
-                ) : (
-                  /* Placeholder reserved space while traveling/intro */
-                  <div className="w-full h-full pointer-events-none" />
-                )}
+                {/* Frameless Holographic Brain Video with clean seamless loop */}
+                <video
+                  ref={settledVideoRef}
+                  src="/videos/brain_rotating_clean.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  disablePictureInPicture={true}
+                  controlsList="nodownload noplaybackrate nofullscreen noremoteplayback"
+                  style={{
+                    maskImage: 'radial-gradient(circle at 50% 50%, black 44%, rgba(0,0,0,0.7) 56%, transparent 68%)',
+                    WebkitMaskImage: 'radial-gradient(circle at 50% 50%, black 44%, rgba(0,0,0,0.7) 56%, transparent 68%)',
+                    opacity: introPhase === 'settled' ? 1 : 0,
+                  }}
+                  className="w-full h-full object-contain mix-blend-screen filter brightness-115 contrast-125 drop-shadow-[0_0_40px_rgba(32,191,232,0.9)] transition-opacity duration-500"
+                />
               </div>
             </div>
           </div>

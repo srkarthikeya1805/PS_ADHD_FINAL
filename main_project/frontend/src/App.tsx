@@ -4,6 +4,7 @@ import { NeuralBackground } from './components/common/NeuralBackground';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { DashboardOverviewPage } from './pages/DashboardOverviewPage';
+import { LandingPage } from './pages/LandingPage';
 import { CinematicOpeningIntro } from './components/intro/CinematicOpeningIntro';
 
 // Context to allow replaying the cinematic opening from any navbar or button
@@ -54,6 +55,7 @@ export function App() {
           <Routes>
             {/* Root lands straight on the redesigned Neural Control Center Dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
 
             {/* Unified Redesigned 9-Section Dashboard Workspace */}
