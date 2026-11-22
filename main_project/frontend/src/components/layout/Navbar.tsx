@@ -12,6 +12,7 @@ import {
   Database,
   Sliders,
   RotateCcw,
+  LogOut,
 } from 'lucide-react';
 import { getHealth } from '../../services/api';
 import { HealthResponse } from '../../types';
@@ -25,7 +26,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ activeSection = 'hero', onNavigateSection, onReplayIntro }) => {
-  const { replayIntro } = useIntro();
+  const { replayIntro, logout } = useIntro();
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [isChecking, setIsChecking] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
@@ -96,41 +97,37 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection = 'hero', onNaviga
           <nav className="hidden lg:flex items-center gap-1.5 p-1 rounded-full bg-[#061426]/90 border border-[#20BFE8]/25 backdrop-blur-2xl shadow-[0_0_30px_rgba(0,0,0,0.9)] text-[11px] font-heading font-extrabold tracking-wider">
             <button
               onClick={() => scrollTo('scene-hero')}
-              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                activeSection === 'hero'
-                  ? 'bg-[#20BFE8]/25 border border-[#20BFE8]/70 text-[#79DFFF] shadow-[0_0_15px_rgba(32,191,232,0.3)] font-black'
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeSection === 'hero'
+                ? 'bg-[#20BFE8]/25 border border-[#20BFE8]/70 text-[#79DFFF] shadow-[0_0_15px_rgba(32,191,232,0.3)] font-black'
+                : 'text-slate-400 hover:text-white'
+                }`}
             >
               01 BRAIN
             </button>
             <button
               onClick={() => scrollTo('scene-montage')}
-              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                activeSection === 'montage'
-                  ? 'bg-[#087CFF]/25 border border-[#087CFF]/70 text-[#79DFFF] shadow-[0_0_15px_rgba(8,124,255,0.3)] font-black'
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeSection === 'montage'
+                ? 'bg-[#087CFF]/25 border border-[#087CFF]/70 text-[#79DFFF] shadow-[0_0_15px_rgba(8,124,255,0.3)] font-black'
+                : 'text-slate-400 hover:text-white'
+                }`}
             >
               02 10-20 MONTAGE
             </button>
             <button
               onClick={() => scrollTo('scene-pipeline')}
-              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                activeSection === 'pipeline'
-                  ? 'bg-[#20BFE8]/25 border border-[#20BFE8]/70 text-[#79DFFF] shadow-[0_0_15px_rgba(32,191,232,0.3)] font-black'
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeSection === 'pipeline'
+                ? 'bg-[#20BFE8]/25 border border-[#20BFE8]/70 text-[#79DFFF] shadow-[0_0_15px_rgba(32,191,232,0.3)] font-black'
+                : 'text-slate-400 hover:text-white'
+                }`}
             >
               03 AI PIPELINE
             </button>
             <Link
               to="/login"
-              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                activeSection === 'lab'
-                  ? 'bg-emerald-500/25 border border-emerald-400/70 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] font-black'
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeSection === 'lab'
+                ? 'bg-emerald-500/25 border border-emerald-400/70 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)] font-black'
+                : 'text-slate-400 hover:text-white'
+                }`}
             >
               04 NEURAL LAB
             </Link>
@@ -167,11 +164,10 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection = 'hero', onNaviga
           <button
             onClick={handleToggleAudio}
             title={isMuted ? 'Enable Neuro-Soundscape' : 'Mute Soundscape'}
-            className={`p-2 rounded-full border backdrop-blur-2xl transition-all cursor-pointer ${
-              !isMuted
-                ? 'bg-[#20BFE8]/20 border-[#20BFE8] text-[#20BFE8] shadow-[0_0_15px_rgba(32,191,232,0.4)]'
-                : 'bg-[#030914]/90 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
-            }`}
+            className={`p-2 rounded-full border backdrop-blur-2xl transition-all cursor-pointer ${!isMuted
+              ? 'bg-[#20BFE8]/20 border-[#20BFE8] text-[#20BFE8] shadow-[0_0_15px_rgba(32,191,232,0.4)]'
+              : 'bg-[#030914]/90 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+              }`}
           >
             {!isMuted ? <Volume2 className="w-4 h-4 animate-pulse" /> : <VolumeX className="w-4 h-4" />}
           </button>
@@ -184,6 +180,16 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection = 'hero', onNaviga
           >
             <RotateCcw className="w-3.5 h-3.5 text-[#20BFE8]" />
             <span className="hidden sm:inline">3D Intro</span>
+          </button>
+
+          {/* Sign Out / Return to Login Screen */}
+          <button
+            onClick={() => logout()}
+            title="Lock Session & Return to Login Screen"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#030914]/90 border border-slate-800 hover:border-rose-500/50 text-slate-400 hover:text-rose-400 text-xs font-mono font-medium transition-all cursor-pointer shadow-sm"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Logout</span>
           </button>
 
           {/* Backend API Health Status Indicator */}

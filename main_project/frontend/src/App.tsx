@@ -7,30 +7,39 @@ import { DashboardOverviewPage } from './pages/DashboardOverviewPage';
 import { LandingPage } from './pages/LandingPage';
 import { CinematicOpeningIntro } from './components/intro/CinematicOpeningIntro';
 
+import { clearSession, getSession } from './services/storage';
+
 // Context to allow replaying the cinematic opening from any navbar or button
 export const IntroContext = createContext<{
   replayIntro: () => void;
   showIntro: boolean;
   introTrigger: number;
-  introPhase: 'intro' | 'traveling' | 'settled';
-  setIntroPhase: (phase: 'intro' | 'traveling' | 'settled') => void;
+  introPhase: 'login' | 'intro' | 'traveling' | 'settled';
+  setIntroPhase: (phase: 'login' | 'intro' | 'traveling' | 'settled') => void;
+  logout: () => void;
 }>({
   replayIntro: () => { },
   showIntro: true,
   introTrigger: 0,
-  introPhase: 'settled',
+  introPhase: 'login',
   setIntroPhase: () => { },
+  logout: () => { },
 });
 
 export const useIntro = () => useContext(IntroContext);
 
 export function App() {
   const [introTrigger, setIntroTrigger] = useState(0);
-  const [introPhase, setIntroPhase] = useState<'intro' | 'traveling' | 'settled'>(() => {
+  const [introPhase, setIntroPhase] = useState<'login' | 'intro' | 'traveling' | 'settled'>(() => {
     try {
-      return sessionStorage.getItem('neuroscan_intro_viewed') ? 'settled' : 'intro';
+      // If user has an active logged-in session and already completed intro
+      const hasSession = !!getSession();
+      const introDone = !!sessionStorage.getItem('neuroscan_intro_viewed');
+      if (hasSession && introDone) return 'settled';
+      // User must see the login page first as requested
+      return 'login';
     } catch {
-      return 'settled';
+      return 'login';
     }
   });
 
@@ -42,10 +51,18 @@ export function App() {
     setIntroTrigger((prev) => prev + 1);
   };
 
+  const logout = () => {
+    try {
+      sessionStorage.removeItem('neuroscan_intro_viewed');
+    } catch {}
+    clearSession();
+    setIntroPhase('login');
+  };
+
   const showIntro = introPhase !== 'settled';
 
   return (
-    <IntroContext.Provider value={{ replayIntro, showIntro, introTrigger, introPhase, setIntroPhase }}>
+    <IntroContext.Provider value={{ replayIntro, showIntro, introTrigger, introPhase, setIntroPhase, logout }}>
       <div className="min-h-screen bg-[#030914] text-[#F3F8FF] relative">
         <BrowserRouter>
           {/* Persistent Dark Blue Neural Nerve Background on Every Route */}

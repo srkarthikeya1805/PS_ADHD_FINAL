@@ -47,6 +47,7 @@ import { generateClinicalPdfReport } from '../utils/pdfReportGenerator';
 
 import { useIntro } from '../App';
 import { TopographicScalpHeatmap } from '../components/charts/TopographicScalpHeatmap';
+import { CenteredLogin } from '../components/auth/CenteredLogin';
 
 // Default Benchmark Datasets for Instant Demonstration
 const DEFAULT_ADHD_RESULT: FilePredictionResult = {
@@ -629,9 +630,24 @@ export const DashboardOverviewPage: React.FC = () => {
       {/* SECTION 1: STARTING OVERVIEW PAGE                                         */}
       {/* ========================================================================= */}
       <section id="section-overview" className="space-y-6">
+        {/* Fullscreen Centered Login Screen (Displayed as soon as user opens website) */}
+        <AnimatePresence>
+          {introPhase === 'login' && (
+            <CenteredLogin
+              onSuccess={() => {
+                setIntroPhase('intro');
+                if (introVideoRef.current) {
+                  introVideoRef.current.currentTime = 0;
+                  introVideoRef.current.play().catch(() => {});
+                }
+              }}
+            />
+          )}
+        </AnimatePresence>
+
         {/* Fullscreen Master Cinematic Intro - Covers whole website dimensions */}
         <AnimatePresence>
-          {introPhase !== 'settled' && (
+          {introPhase !== 'settled' && introPhase !== 'login' && (
             <motion.div
               key="fullscreen-cinematic-intro"
               className="fixed inset-0 w-screen h-screen z-[99999] overflow-hidden flex items-center justify-center select-none"
