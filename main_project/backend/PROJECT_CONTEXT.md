@@ -57,10 +57,10 @@ The system processes raw, multi-format EEG data through a modular, deterministic
                                                              v
 +-----------------------------------------------------------------------------------------+
 |                        5. Calibrated Hybrid Deep Learning Ensemble                      |
-|  - CNN-Transformer (Weight = 0.60): 1D Convolutions + Multi-Head Self-Attention Head     |
-|  - Welch PSD + XGBoost (Weight = 0.30): Power spectral density across Delta, Theta,      |
+|  - CNN-Transformer (Weight = 0.50): 1D Convolutions + Multi-Head Self-Attention Head   |
+|  - EEGNet (Weight = 0.25): Depthwise & Separable Spatio-Temporal Convolutions          |
+|  - Welch PSD + XGBoost (Weight = 0.25): Power spectral density across Delta, Theta,    |
 |    Alpha, Beta, Gamma frequency bands                                                   |
-|  - EEGNet (Weight = 0.10): Depthwise & Separable Spatio-Temporal Convolutions          |
 |  - Decision Threshold: 0.49 (Ensemble Score ≥ 0.49 → ADHD, < 0.49 → Control)            |
 +------------------------------------------------------------+----------------------------+
                                                              |
@@ -202,7 +202,7 @@ The platform is calibrated specifically for **clinical EEG ADHD detection** and 
 
 ---
 
-## 10. Frontend Architecture, Custom Neuroscience Typography & Interactive Bulging Engine
+## 10. Frontend Architecture, Custom Neuroscience Typography & Visual Polish
 
 ### 10.1 Typography Suite
 - **Navigation & Telemetry Font (`Oxanium` / `Orbitron`)**: Distinctive, angular high-tech writing style font providing an aerospace/neuro-clinical command center aesthetic.
@@ -210,10 +210,78 @@ The platform is calibrated specifically for **clinical EEG ADHD detection** and 
 - **Body & Explanatory Prose (`Plus Jakarta Sans`)**: High-legibility geometric sans-serif for clinical readability.
 - **Telemetry & Data Tables (`JetBrains Mono`)**: Fixed-width clarity for numerical arrays, frequency ranges, and coordinates.
 
-### 10.2 Universal Interactive Bulging Hover Engine
-- Configured across `src/index.css`, `Button.tsx`, and `LandingPage.tsx` using spring physics (`cubic-bezier(0.34, 1.56, 0.64, 1)`):
-  - **Buttons & Pills**: Expand by $+6\%$ to $+10\%$ (`scale(1.06) - scale(1.10)`) with ambient cyan drop-shadow on cursor hover.
-  - **10-20 Scalp Electrode Grid**: Individual channel nodes expand by $+22\%$ (`scale(1.22) translateY(-3px)`) with glowing cyan saturation.
-  - **Feature Cards & Table Containers**: Expand by $+3.5\%$ with deep glass shadow elevation.
-  - **Tactile Active Press**: Smooth spring compression to `scale(0.96)` on mouse click.
-- **Enhanced Contrast Notice Boxes**: High-opacity solid dark glass backing (`bg-[#070e1e]/95` with `backdrop-blur-2xl`) and enlarged 16px–20px typography preventing background particle bleed-through.
+### 10.2 Professional Stabilized Micro-Interactions (Zero Distorting Bulging)
+- In the final production release, aggressive scaling and card bulging on hover were removed across the entire dashboard to ensure clinical grade stability and precise cursor interaction.
+- **Subtle Glow & Border Accents**: Subtle cyan/electric blue border illumination (`border-[#20BFE8]/60`) and soft backdrop glows on cursor hover.
+- **Smooth Tactile Feedback**: Micro-scale click compression (`active:scale-[0.98]`) providing responsive tactile confirmation without layout jitter.
+- **High-Contrast Glass Panels**: Dark glass backing (`bg-[#040e24]/90` with `backdrop-blur-xl`) preventing background particle bleed-through.
+
+---
+
+## 11. Pre-Video Centered Authentication Gate (`CenteredLogin`)
+
+To match clinical laboratory security protocols, a centered authentication portal is positioned directly at application launch before the 3D cinematic opening video is initiated.
+
+```
++-------------------------------------------------------------+
+|                      [ NeuroScan AI ]                       |
+|           Sign in to continue your journey with AI          |
+|                                                             |
+|  [✉ Email Address ]                                        |
+|  [🔒 Password                     👁]                       |
+|                                                             |
+|  [✓] Remember Me                       Forgot Password?     |
+|                                                             |
+|  +-------------------------------------------------------+  |
+|  |                       Login  →                        |  |
+|  +-------------------------------------------------------+  |
+|                                                             |
+|  --------------------------- OR --------------------------  |
+|                                                             |
+|  +-------------------------------------------------------+  |
+|  |                 👤 Continue as Guest                  |  |
+|  +-------------------------------------------------------+  |
+|                                                             |
+|                 Don't have an account? Sign Up              |
++-------------------------------------------------------------+
+```
+
+### Key Workflow:
+1. **Initial Visit**: When a user accesses the site, the centered authentication card (`CenteredLogin.tsx`) renders on top of the dark neural nerve canvas.
+2. **Authentication Options**:
+   - Standard login with credentials and visibility toggle (`Eye`/`EyeOff`).
+   - Persistent session state via "Remember Me" checkbox.
+   - One-click **"Continue as Guest"** button for immediate clinical demonstration without credential setup.
+3. **Seamless Video Transition**: Upon successful authentication or guest selection, the full-screen cinematic 3D neural video plays smoothly, transitioning seamlessly into the 9-Section Dashboard.
+4. **Session Controls**: A dedicated **Logout** button is integrated into both the sticky dashboard `Header.tsx` and `Navbar.tsx`, allowing users to end sessions and return to the login gate instantly.
+
+---
+
+## 12. 3-Scenario Diagnostic & Topographic Scalp Heatmap System
+
+The Topographic Scalp Heatmap (`TopographicScalpHeatmap.tsx`) dynamically adapts its 19-electrode montage, frequency band powers, and live waveform oscilloscope based on the detected dataset scenario:
+
+| Scenario | Input Type & Signals | Topographic Scalp Behavior | Live Oscilloscope Waveform Monitor | Diagnostic Output |
+| :--- | :--- | :--- | :--- | :--- |
+| **Scenario 1: Valid 10-20 Clinical EEG** | Pediatric ADHD/Control recordings (`.mat`, `.csv`, `.edf`, `.gdf`, `.zip`) | Fully active 19 electrodes ($Fp1$ to $O2$). Authentic spatial power distribution, Theta/Beta Ratio (TBR), and 6 selectable metric modes (`TBR`, `Theta`, `Beta`, `Delta`, `Alpha`, `Gamma`). | Continuous live multi-lead sine wave oscillation with freeze/play, speed scaling ($1\times, 1.5\times, 2\times$), and lobe filters. | ADHD vs. Control prediction, confidence %, and 3-model breakdown (CNN 50%, EEGNet 25%, XGBoost 25%). |
+| **Scenario 2: Non-EEG / Corrupt Data** | Non-EEG files, trial sequence logs, noise, corrupted `.mat` files | **Zeroed / Deactivated**. All 19 electrode power values drop to $0.0\,\mu\text{V}^2$, TBR to $0.0$, and nodes display `Deactivated`. | **Completely blanked / flatlined** ($0.0\,\mu\text{V}$) across all 19 channels to prevent spurious visual artifacts. | Prominent red warning banner explaining non-biological signal rejection. |
+| **Scenario 3: Non-Brain / BCI Motor Imagery** | Motor imagery, hand movement imagination datasets (e.g. `BCICIV_2a`) | **Sensorimotor Isolation**. Central motor strip leads ($C3, Cz, C4$) illuminate with elevated SMR Beta ($26.8\,\mu\text{V}^2$). Peripheral leads ($Fp1, Fp2$, etc.) remain resting. | Live waveforms active specifically on $C3, Cz, C4$ sensorimotor leads; other channels remain resting. | Yellow diagnostic alert explaining absence of required 10-20 prefrontal leads for ADHD assessment. |
+
+---
+
+## 13. Permanent Cloud Deployment Architecture
+
+The application is structured for permanent, zero-maintenance cloud hosting:
+
+1. **Frontend (Vercel / Netlify)**:
+   - Root Directory: `main_project/frontend`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Environment Variable: `VITE_API_BASE_URL=https://your-backend.onrender.com`
+   - Client-side routing rewrite rules configured in `vercel.json`.
+2. **Backend (Render / Railway / Fly.io / VPS)**:
+   - Root Directory: `main_project/backend`
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Automatic model weight discovery from `models/` directory.
+   - CORS middleware configured with `allow_origins=["*"]` for seamless frontend communication.

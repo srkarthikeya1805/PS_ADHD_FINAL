@@ -2,80 +2,52 @@
 
 A state-of-the-art, cinematic neuroscience web application built with **React 19**, **Vite**, **TypeScript**, **Three.js / React Three Fiber**, **Tailwind CSS v4**, **Framer Motion**, and **Recharts**.
 
-NeuroScan AI pairs directly with the [Universal EEG ADHD Detection Backend](file:///d:/srkarthikeya1805%20ps_adhd_2026%20main%20adhd_backend/README.md) to provide clinical researchers, computational neuroscientists, and lab evaluators with real-time bio-signal validation, multi-model ensemble predictions, 19-channel 10-20 waveform exploration, and cohort concordance telemetry.
+NeuroScan AI pairs directly with the [Universal EEG ADHD Detection Backend](../backend/README.md) to provide clinical researchers, computational neuroscientists, and lab evaluators with real-time bio-signal validation, multi-model ensemble predictions, 19-channel 10-20 waveform exploration, and cohort concordance telemetry.
 
 ---
 
 ## 🌟 Key Application Features
 
-### 1. Direct-to-Workspace Scientific Landing Page & 3D Interactive Brain (`src/pages/LandingPage.tsx`, `src/components/BrainCanvas.tsx`)
-* **Instant UI Presentation**: Bypasses preliminary intro animation sequences to render the comprehensive clinical interface immediately on root load (`http://localhost:5173/`).
-* **Dynamic Geometry**: Custom procedural dual-hemisphere 3D mesh with gyri-like surface displacement, glowing vertex shaders (cyan, electric blue, violet, magenta), and atmospheric point lights.
-* **Synaptic Filaments & Electrical Pulses**: Travelling particle nodes propagate along synaptic curves across cortical lobes.
-* **Live 10-20 Microvolt Streams**: Floating HUD telemetry displaying real-time waveforms across 8 representative channels (Fp1, Fp2, Fz, C3, Cz, Pz, O1, O2).
-* **Interactive Cortical Lobes**: Real-time hover and click inspection for Frontal, Parietal, Temporal, and Occipital lobes with anatomical descriptions and ADHD neuro-developmental correlations.
-* **Resilient Architecture**: Automated WebGL context-loss recovery and seamless 2D canvas fallback (`BrainFallback.tsx`) for low-end hardware or virtualized environments.
-* **Accessible Motion**: Built-in `prefers-reduced-motion` detection and GPU acceleration.
+### 1. Pre-Video Centered Authentication Gate (`src/components/auth/CenteredLogin.tsx`)
+* **Cyber-Clinical Design**: Centered glassmorphic login card appearing directly on application load before the 3D cinematic opening video is initiated.
+* **Authentication Controls**:
+  * Email Address & Password input with interactive visibility toggle (`Eye` / `EyeOff`).
+  * "Remember Me" persistent session toggle via `localStorage`.
+  * "Forgot Password?" email recovery dispatch alert.
+  * Form validation with dynamic submission states.
+  * **"Continue as Guest"**: One-click bypass for instant clinical evaluation without credential requirements.
+* **Seamless Cinematic Transition**: Authenticating or selecting guest immediately launches the full-screen cinematic 3D neural journey, which smoothly settles into the 9-Section Control Center Dashboard.
+* **Session Management & Logout**: Dedicated `Logout` pill buttons integrated in both the sticky dashboard `Header.tsx` and `Navbar.tsx` for one-click session termination and return to the login portal.
 
-### 2. Multi-Tier Bio-Signal Validation & Rejection Alerts (`src/pages/BatchResultsPage.tsx`, `UploadPage.tsx`)
-* **Strict Biological Signal Gating**: When non-signal metadata (`trial_sequence.zip`), non-ADHD motor imagery paradigms (`BCICIV_1_mat.zip`), or incompatible sparse montages lacking standard 10-20 channels (`MENDELY_ADHD.zip`) are uploaded, the UI halts prediction and displays prominent clinical rejection banners.
-* **Exact Reason Diagnostics**: Clear diagnostic feedback explaining why recordings were rejected (e.g. *BCI Motor Imagery Paradigm*, *Incompatible Montage (<19 channels)*, or *Flatline / Zero-Variance Signal*).
+### 2. 3-Scenario Topographic Scalp Heatmap & Waveform Monitor (`src/components/charts/TopographicScalpHeatmap.tsx`)
+* **Scenario 1: Valid 10-20 Clinical Pediatric EEG** (`.mat`, `.csv`, `.edf`, `.gdf`, `.zip`):
+  * Fully illuminated 19 standard electrodes (Fp1–O2) across 5 cortical lobes.
+  * 6 selectable diagnostic metric modes: Theta/Beta Ratio (**TBR**), **Theta** (4–8 Hz), **Beta** (13–30 Hz), **Delta** (0.5–4 Hz), **Alpha** (8–13 Hz), and **Gamma** (30–45 Hz).
+  * Prominent prominent channels analysis highlighting key Frontal/Central biomarkers ($Fz, Cz, F3, F4$).
+  * Real-time 19-lead animated waveform oscilloscope with Live/Freeze toggle, playback speed adjustment ($1\times, 1.5\times, 2\times$), and cortical lobe filters (All, Frontal, Central, Temporal, Parietal, Occipital).
+* **Scenario 2: Non-EEG Metadata / Corrupted / Incompatible Signals**:
+  * **Complete Deactivation**: All 19 electrode power values drop to $0.0\,\mu\text{V}^2$, TBR drops to $0.0$, and nodes display `(Deactivated)` status.
+  * **Blanked Oscilloscope**: Signal traces are flattened to $0.0\,\mu\text{V}$ flatline, completely suppressing false visual waveforms.
+  * Rejection banner displays exact physical reason (e.g. *Task Metadata / Short Trial Log*, *Sample length < 2.5s*).
+* **Scenario 3: Non-Brain / BCI Motor Imagery / Hand Gesture Datasets**:
+  * **Sensorimotor Strip Isolation**: Illuminates specifically the motor cortex leads ($C3, Cz, C4$) showing elevated Sensorimotor Rhythm (SMR) Beta ($26.8\,\mu\text{V}^2$).
+  * Peripheral frontal/temporal leads remain in resting baseline state.
+  * Clinical advisory banner explains that motor imagery paradigms lack the frontal montage required for valid ADHD cognitive assessment.
 
-### 3. Clinical Cohort Concordance Telemetry (`src/pages/BatchResultsPage.tsx`)
-* **Live Concordance KPI Grid**:
-  * **Concordance Rate**: Overall percentage of model predictions matching clinical diagnostic tables.
-  * **Concordant vs. Discordant Files**: Highlighting validated clinical agreement.
-  * **Sensitivity (ADHD Recall)**: True Positive rate across verified ADHD cohorts.
-  * **Specificity (Control Recall)**: True Negative rate across healthy control groups.
-* **Interactive Ground Truth Table**:
-  * Displays detected Reference Cohort Ground Truth alongside Live Model Predictions.
-  * Color-coded status badges: `Concordant` (emerald green) vs `Discordant` (amber/crimson).
-  * Direct drill-down link to single-recording window timelines and probability gauges.
+### 3. Unified 9-Section Neural Control Center Dashboard (`src/pages/DashboardOverviewPage.tsx`)
+* **Section 1: Starting Overview Page**: Hero banner with live session status, audio synthesizer toggle, 3D intro replay button, and quick jump buttons.
+* **Section 2: Interactive EEG Upload & Validation Console**: Drag-and-drop file ingestion supporting `.mat`, `.csv`, `.edf`, `.gdf`, and `.zip` archives. Includes quick-load buttons for built-in research fixture cohorts.
+* **Section 3: Primary Diagnostic Inference Banner & Cohort Roster Table**: Prominent probability gauge, ADHD vs. Control diagnosis, confidence score, and interactive multi-subject roster table. Pre-populated by default with the verified IEEE 121-subject clinical cohort.
+* **Section 4: Multi-Domain EEG Feature Biomarkers**: Frontal Theta/Beta Ratio (TBR), Individual Alpha Peak Frequency (IAF), and Delta/Gamma coherence gauges.
+* **Section 5: Per-Model Prediction Accuracy & Clinical Breakdown**: Individual model cards for CNN-Transformer (50% weight, 92.6% acc), EEGNet (25% weight, 87.6% acc), and Welch PSD + XGBoost (25% weight, 86.0% acc).
+* **Section 6: 2D Scalp Topography & Waveform Monitor**: Dynamic 3-scenario 19-channel scalp map and synchronized oscilloscope.
+* **Section 7: 3D Anatomical Brain Reconstruction & Recovery Trajectory**: Procedural 3D brain with cortical lobe hotspot inspection and interactive clinical care protocols.
+* **Section 8: Clinical Decision Support & Actionable Recommendations**: Evidence-based therapeutic interventions (SMR neurofeedback, prefrontal rest, circadian sleep architecture).
+* **Section 9: Audit Trail, Verification Logs & PDF Export**: Client-side clinical PDF report generator (`html2canvas` + `jspdf`) and verifiable audit trail logs.
 
-### 4. 3-Model Hybrid Deep Learning Suite (`src/pages/ModelEnsemblePage.tsx`)
-* **Calibrated Model Weights**:
-  * **CNN-Transformer (60% Weight)**: 1D Temporal Convolutions + Multi-Head Self-Attention Transformer Head capturing long-range temporal dependencies.
-  * **Welch PSD + XGBoost (30% Weight)**: Gradient-boosted decision trees over Delta, Theta, Alpha, Beta, and Gamma frequency bandpowers.
-  * **EEGNet (10% Weight)**: Compact spatio-temporal depthwise and separable convolutions.
-* **Decision Boundary**:
-  $$\text{Ensemble Probability} = 0.60 \times P_{\text{CNN-Transformer}} + 0.30 \times P_{\text{PSD-XGBoost}} + 0.10 \times P_{\text{EEGNet}}$$
-  $$\text{Decision Threshold} = 0.49 \quad (\ge 0.49 \implies \text{ADHD}, < 0.49 \implies \text{Control})$$
-* **Scientific Transparency**: Clear demarcation between configured ensemble voting weights and empirical model accuracy.
-
-### 5. Multi-Channel Signal Waveform Explorer & 3D Scalp Topography (`src/pages/SignalExplorerPage.tsx`)
-* **3D Scalp Electrode Topography Showcase**: Integrated `AuraTiltCard` rendering 3D scalp montage geometry with live ±50 μV potential telemetry and corner status monitors.
-* **Continuous Real-Time Waveform Monitors**: 3 dedicated waveform monitors for Slow Potentials (1–4 Hz Delta), Theta/Alpha (4–12 Hz Sensory Rhythms & TBR), and Fast Beta (13–30 Hz Active Focus).
-* **Interactive 19-Channel Electrode Selector**: Quick selection across all 19 standard electrodes (Fp1, Fp2, F7, F3, Fz, F4, F8, T3, C3, Cz, C4, T4, T5, P3, Pz, P4, T6, O1, O2) displaying specific cortical lobe mapping, microvolt amplitude range, ADHD biomarker impact, and clinical significance.
-* **Signal Telemetry Controls**: Amplitude gain scaling ($0.5\times$ to $5\times$), timebase speed adjustment, individual channel toggle filters, and real-time playback animation.
-* **Spectral Band Energy Profiler**: Real-time telemetry across Delta (0.5–4 Hz), Theta (4–8 Hz), Alpha (8–13 Hz), Beta (13–30 Hz), and Gamma (30–45 Hz) bands with Frontal Theta/Beta Ratio (TBR).
-
-### 6. Clinical Brain Recovery & Care Dashboard (`src/pages/BrainRecoveryPage.tsx`, `/dashboard/neuro-care`)
-* **4-Tier Clinical Care Hub**: Actionable neuroplasticity and recovery protocols spanning:
-  * **SMR Neurofeedback (12–15 Hz)**: Operant conditioning protocol targeting central strip ($Cz, C3, C4$) rhythm enhancement to reduce involuntary motor fidgeting.
-  * **Dopamine & Prefrontal Synaptic Rest**: Non-Sleep Deep Rest (NSDR 15–20 min), structured 25/5 Pomodoro cycles to prevent prefrontal glycogen depletion, and dopamine baseline stabilization.
-  * **Circadian Sleep Architecture & Glymphatic Cleansing**: Optimizing slow-wave sleep (Stage 3 NREM) and glymphatic metabolic waste clearance to lower morning theta excess.
-  * **Multi-Modal Lifestyle & Dietary Interventions**: Precursor nutrition (L-Tyrosine, Magnesium L-Threonate), morning high-lux sunlight retinal exposure, and high-intensity aerobic exercise.
-* **Interactive 19-Channel Neuro-Pathology Inspection Modal**: Real-time simulated EEG waveforms across 5 physiological bands with scalp hotspot mapping (Prefrontal DLPFC, Fronto-Striatal circuit, Sensorimotor strip) and high-resolution clinical imaging.
-* **Auditory Biofeedback**: Integrated Web Audio API tone synthesis for auditory neuro-training.
-
-### 7. Interactive 3D AuraTiltCard Architecture & Sequential Scroll Cascades (`src/components/common/AuraTiltCard.tsx`, `LandingPage.tsx`)
-* Physics-based 3D tilt cards with specular light tracking on deep learning model architecture cards (`EnsembleCard.tsx`).
-* One-click modal image lightbox zoom for inspecting architecture diagrams.
-* Framer Motion sequential scroll stagger cascades across pipeline stages and ensemble components.
-* Video compression optimization (~10s-13s) for smooth instant playback.
-
-### 8. 10-Stage Pipeline Visualizer (`src/pages/PipelineDiagram.tsx`)
-* Interactive node diagram visualizing the complete biomedical signal processing sequence:
-  1. Universal File Parsing (.mat, .edf, .bdf, .gdf, .csv, .tsv, .npy, .zip)
-  2. Multi-Tier Bio-Signal Authenticator (Tiers 0–7)
-  3. Channel Harmonization & 10-20 Scalp Mapping
-  4. Polyphase Rational Resampling to 128.0 Hz
-  5. 4th-Order Butterworth Bandpass (1.0–45.0 Hz) & 50 Hz Notch Filtering
-  6. Per-Channel Z-Score Normalization
-  7. Developmental Spectral Profiling (IAF & TBR)
-  8. 10-Second Temporal Segmentation (1280 samples, 50% overlap)
-  9. Multi-Model Inference (CNN-Transformer, EEGNet, PSD-XGBoost)
-  10. Calibrated Ensemble Classification & Telemetry Reporting
+### 4. Direct-to-Workspace Scientific Landing Page (`src/pages/LandingPage.tsx`)
+* **Dynamic 3D Procedural Brain Mesh**: Dual-hemisphere geometry with vertex displacement shaders, electrical synaptic pulses, and interactive cortical lobe highlighting.
+* **Hardware Resilience**: Automated WebGL context-loss detection with seamless 2D canvas fallback (`BrainFallback.tsx`).
 
 ---
 
@@ -84,88 +56,42 @@ NeuroScan AI pairs directly with the [Universal EEG ADHD Detection Backend](file
 | Domain | Libraries & Frameworks |
 | :--- | :--- |
 | **Framework** | [React 19](https://react.dev/), [Vite 6](https://vitejs.dev/), [TypeScript](https://www.typescriptlang.org/) |
-| **Styling & Design** | [Tailwind CSS v4](https://tailwindcss.com/), Glassmorphism design tokens |
+| **Styling & Design** | [Tailwind CSS v4](https://tailwindcss.com/), Cyber-blue glassmorphism tokens |
 | **3D Graphics** | [Three.js](https://threejs.org/), [React Three Fiber](https://r3f.docs.pmnd.rs/), [React Three Drei](https://github.com/pmndrs/drei) |
 | **Animations** | [Framer Motion](https://www.framer.com/motion/) |
-| **Data Visualization** | [Recharts](https://recharts.org/), Custom SVG Canvas visualizers |
+| **Data Visualization** | [Recharts](https://recharts.org/), Custom HTML5 Canvas Oscilloscope, SVG Topography |
+| **Reporting** | [jspdf](https://github.com/parallax/jsPDF), [html2canvas](https://html2canvas.hertzen.com/) |
 | **Icons** | [Lucide React](https://lucide.dev/) |
 | **Routing & State** | [React Router v7](https://reactrouter.com/), Context API, LocalStorage persistence |
 
 ---
 
-## 📁 Frontend Project Structure
+## 🚀 How to Run Frontend Locally
 
-```text
-frontend/
-├── src/
-│   ├── assets/                # Static brand logos, icons, and textures
-│   ├── components/            # Reusable UI component library
-│   │   ├── BrainCanvas.tsx    # Three.js 3D procedural interactive brain
-│   │   ├── BrainFallback.tsx  # Resilient WebGL failure / 2D canvas fallback
-│   │   ├── Navbar.tsx         # Responsive glassmorphism navigation header
-│   │   ├── Footer.tsx         # Clinical disclaimer and system metadata footer
-│   │   ├── CinematicLoadingOverlay.tsx # 5-stage animated analysis sequence
-│   │   ├── NeuralTimeline.tsx # Window-by-window 10s segmentation timeline
-│   │   ├── PipelineDiagram.tsx # 10-stage architecture node graph
-│   │   └── ProbabilityGauge.tsx # Animated SVG probability meter
-│   │
-│   ├── pages/                 # Full-page route views
-│   │   ├── LoginPage.tsx      # Research demo login & guest access
-│   │   ├── DashboardOverviewPage.tsx # System health, status, & telemetry
-│   │   ├── UploadPage.tsx     # File uploader & pre-validation inspector
-│   │   ├── ResultsPage.tsx    # Single recording analysis & window charts
-│   │   ├── BatchResultsPage.tsx # Cohort concordance telemetry & ground truth table
-│   │   ├── ModelEnsemblePage.tsx # 3-model weights, equations & architecture
-│   │   ├── SignalExplorerPage.tsx # 19-channel waveform viewer & PSD telemetry
-│   │   ├── BrainRecoveryPage.tsx # Clinical care hub, 19-ch pathology & neurofeedback
-│   │   ├── HistoryPage.tsx    # Persistent session analysis history
-│   │   └── SettingsPage.tsx   # API endpoint diagnostics & latency monitor
-│   │
-│   ├── services/
-│   │   └── api.ts             # Typed Axios client & backend REST integrations
-│   │
-│   ├── types/
-│   │   └── eeg.ts             # Pydantic-mirrored TypeScript interfaces
-│   │
-│   ├── App.tsx                # Route provider & global notification context
-│   ├── main.tsx               # Application bootstrap
-│   └── index.css              # Tailwind v4 theme, fonts, and glassmorphism tokens
-│
-├── package.json               # Dependencies and build scripts
-├── tsconfig.json              # TypeScript compiler configuration
-└── vite.config.ts             # Dev server configuration with backend proxy
+```bash
+cd main_project/frontend
+npm install
+npm run dev
+```
+Open `http://localhost:5173/` in your browser.
+
+### Production Build:
+```bash
+npm run build
+npm run preview
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🌐 Permanent Deployment Guide
 
-### Prerequisites
-* **Node.js**: v18.0.0 or higher
-* **npm**: v9.0.0 or higher
-* Running backend instance at `http://127.0.0.1:8000` (see root [README.md](file:///d:/srkarthikeya1805%20ps_adhd_2026%20main%20adhd_backend/README.md))
-
-### 1. Install Dependencies
-```powershell
-cd frontend
-npm install
-```
-
-### 2. Launch Development Server
-```powershell
-npm run dev
-```
-The application will launch at `http://localhost:5173`.  
-All API calls directed to `/api` or `/health` are automatically proxied to `http://127.0.0.1:8000` via `vite.config.ts`.
-
-### 3. Production Build
-```powershell
-# Type check and build optimized bundle:
-npm run build
-
-# Preview production build locally:
-npm run preview
-```
+### Deploying on Vercel:
+1. Connect your GitHub repository to [Vercel](https://vercel.com).
+2. Set **Root Directory** to `main_project/frontend`.
+3. Set **Framework Preset** to `Vite`.
+4. Add Environment Variable:
+   * `VITE_API_BASE_URL` = `https://your-backend-url.onrender.com` (Your deployed FastAPI backend URL, without trailing slash).
+5. Click **Deploy**.
 
 ---
 
